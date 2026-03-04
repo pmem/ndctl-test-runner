@@ -1,235 +1,210 @@
-# Requirements
- - mkosi
-   - e.g. `dnf install mkosi`
- - `qemu-system-x86_64`
- - rsync
- - dracut
- - enabled virtualization (KVM)
- - nopasswd sudo preferred, or run as root, or enter passwords into the prompt
- several times
- - `argbash` to generate the argument parser lib (using `parser_generator.m4`)
+# CXL Test Runner
 
-## mkosi
+CXL Test Runner is a GitHub Actions workflow that allows Linux kernel
+developers to validate CXL changes using the ndctl CXL test suite.
 
-Finding an mkosi version compatible with your operating system version and
-particular test configuration can sometimes be challenging. First, try the
-version packaged with your operating system. This will indirectly install
-mkosi dependencies (which have surprisingly not changed that much across
-mkosi versions). If that OS-provided mkosi version does not work for you,
-check the long mkosi section below.
+The workflow builds a kernel, boots it in QEMU using run_qemu.sh, and
+executes the CXL unit tests from ndctl.
 
-# Installation
- - symlink the `run_qemu.sh` script into somewhere in your `PATH`
-   - e.g. `ln -s ~/git/run_qemu/run_qemu.sh ~/bin/run_qemu.sh`
- - **Note:** Supporting files in this repo are required to be in the same
-   location as the script, after any symlink resolution. Copying just the
-   script itself will not work.
- - **Bash Completion**
-   - Copy or symlink the `run_qemu` file into the default bash completions dir
-   - The completions directory can be found using:
-       `pkg-config --variable=completionsdir bash-completion`
+The goal is to provide a simple automated testing environment that runs
+entirely on GitHub-hosted infrastructure. No special hardware is required.
 
 
-# Usage Notes
- - Run this from the top level of a Linux kernel tree
-   - e.g. `run_qemu.sh --cxl --git-qemu`
- - The script can/will:
-   - Build the kernel with whatever .config is present
-     (It is up to the user to manage the .config)
-   - Create a rootfs image with the chosen distro using `mkosi`
-   - Perform some basic setup on the rootfs, including installing the kernel,
-     utilities (such as `ndctl`), and other convenience operations such as
-     copying `.ssh/*.pub` keys for easy access, and your `~/.bashrc`
-     etc.
-   - Boot qemu with the newly compiled kernel provided on the qemu command line,
-     and using the rootfs image above
-   - Various options influence the qemu command line generated - there are
-     options to select NUMA config, NVDIMMs, NVME devices, CXL devices etc.
- - More detailed CLI help is available with `run_qemu.sh --help`
- - Once qemu starts, in nographic mode, the Linux console 'takes over' the
-   terminal. To interact with it, the following are useful:
-   - `Ctrl-a c` : switch between the qemu monitor prompt `(qemu)` and console
-   - `Ctrl-a x` : kill qemu and exit
- - `mkosi` creates a package cache in `mkosi.cache/`  If a cache is present,
-   it will always use only that, and never go over the network even if newer
-   packages are available. To force re-fetching everything, remove this
-   directory, or --rebuild=wipe which removes the `builddir` entirely.
- - Which `qemu` to use can be overridden from the environment:
-       `qemu=/path/to/qemu/build/qemu-system-x86_64 ./run_qemu.sh [options]`
- - List of variables that have overrides via `env`:
-     - `qemu`
-     - `gdb`
-     - `distro`
-     - `rev`
-     - `builddir`
-     - `ndctl`
- - To use the 'hostfwd' network, put this in your `.ssh/config`:
+## Quick Start
 
-       Host rq
-         Hostname localhost
-         User root
-         Port 10022
-         StrictHostKeyChecking no
-         UserKnownHostsFile /dev/null
+1. Fork this repository.
 
-    And then `ssh rq`. You may need to open port 10022 on any local firewalls.
-    Then, the `dpipe` and `sshfs` programs can be used to let the guest access
-    host files. For instance, as found in `man sshfs`:
-       `dpipe /usr/lib/ssh/sftp-server = ssh rq sshfs :$HOME/CXL /root/CXL -o passive`
-    "sshfs -o passive" uses stdin and stdout instead of the guest connecting back
-    to the host over the network.
-    If you don't have `dpipe`, try the slightly less efficient:
-      `socat EXEC:/usr/lib/ssh/sftp-server SHELL:"'ssh rq sshfs :$HOME/CXL /root/CXL -o passive'"`
-    Supposedly faster file sharing options like 9P or virtiofs exist too but
-    they require much more complex configuration. `sshfs` generally
-    works out of the box.
- - The root password for the guest VM is `root` by default but note many Linux
-   distributions restrict remote root access in various ways. The serial console
-   automatically logs in, and a password isn't required.
+2. Open the **Actions** tab in your fork.
 
-## CXL Usage
+3. Select **CXL test runner**.
 
-The script enables generating a sane QEMU commandline for instantiating a basic CXL topology. Since QEMU support for CXL isn't yet upstream, `--git-qemu` is additionally required. The CXL related options are:
-- `--cxl`: Enables a simple CXL topology with:
-  - single host bridge
-    - 512M window size at 0x4c00000000
-    - Bus #52
-  - single root port
-  - single Type 3 device
-    - Persistent 256M
-  - simple label storage area
-- --cxl-debug: Add any and all flags for extra debug (kernel and QEMU)
-- --cxl-hb: Turn q35 into a CXL capable Host bridge. Don't use this option unless you're working on support for this.
-- --cxl-test-run: Attempt to do a sanity test of the kernel and QEMU configuration.
+4. Click **Run workflow**.
 
-## DAX Usage
+5. Provide your kernel repository and branch.
 
-- --dax-debug: Add any and all flags for extra debug of dax modules (kernel)
+Repository inputs may be either:
 
-### Kernel config
-- Make sure to Turn on CXL related options in the kernel's .config, at least:
-```
-$ grep -i cxl .config
-CONFIG_CXL_BUS=y
-CONFIG_CXL_PCI=m
-CONFIG_CXL_MEM_RAW_COMMANDS=y
-CONFIG_CXL_ACPI=m
-CONFIG_CXL_PMEM=m
-CONFIG_CXL_MEM=m
-CONFIG_CXL_PORT=y
-CONFIG_CXL_SUSPEND=y
-```
+- a GitHub repository in `owner/name` form
+- a full git URL (for example a kernel.org maintainer tree)
 
-For a more complete list, you can re-use the `*.cfg` files used in
-`.github/` CI as a good starting point:
-```
-make defconfig
-./scripts/kconfig/merge_config.sh .config ../run_qemu/.github/workflows/*.cfg
-```
 
-The following is a way to check basic sanity within the QEMU guest:
-```shell
-lspci  | grep '3[45]:00'
-34:00.0 PCI bridge: Intel Corporation Device 7075
-35:00.0 Memory controller [0502]: Intel Corporation Device 0d93 (rev 01)
+## Try It Now
 
-readlink -f /sys/bus/cxl/devices/mem0
-/sys/devices/pci0000:34/0000:34:00.0/0000:35:00.0/mem0
-```
+You can immediately test the current CXL maintainer tree.
 
-# mkosi
-
-## run mkosi from source
-
-There are many variables (OS distro and version for host and build
-machine, mkosi version, python dependencies,...) and no solution works
-in every situation. `pipx` offers a relatively good compatibility and
-simplicity trade-off, so it is explained first and in most detail but
-if this does not work then there are alternatives mentioned below.
+Example inputs:
 
 ```
-sudo dnf install mkosi
-sudo dnf remove --noautoremove mkosi # keep mkosi dependencies installed
-git clone https://github.com/systemd/mkosi
-cd mkosi
-# Make sure everything is clean when re-using an existing clone
-git status --ignored
-pipx install --system-site-packages --editable .
-pipx list
-mkosi --version
-export mkosi_bin=$(type -ap mkosi)
+kernel_repo: https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git
+kernel_branch: fixes
+ndctl_repo: pmem/ndctl
+ndctl_branch: pending
+timeout_min: 35
 ```
 
-Defining `mkosi_bin` is required because `run_qemu.sh` runs mkosi as root
-(`sudo $mkosi_bin`) but `pipx` installs in a subdirectory of your
-`$HOME` which is not in root's `PATH`. Installing mkosi as root is not
-recommended and does not even work for various, complex reasons.
+This runs the ndctl CXL test suite against the current CXL maintainer
+fixes branch in QEMU.
 
-If you get a "module mkosi not found" error with some mkosi versions, define
-`$mkosi_bin` like this instead:
-```
-export mkosi_bin="$HOME"/.local/share/pipx/venvs/mkosi/bin/mkosi
-"$mkosi_bin" --version
-```
 
-To select a specific `mkosi` release:
+## Example Inputs
+
+Example using a GitHub kernel repository:
 
 ```
-$ cd mkosi
-$ git checkout vNN # where vNN is the release desired
+kernel_repo: yourname/linux
+kernel_branch: cxl-feature-branch
+ndctl_repo: pmem/ndctl
+ndctl_branch: pending
+timeout_min: 35
 ```
 
-Thanks to the `--editable` option, there's no need to re-run `pipx` when
-using git to switch between different mkosi versions... **unless** some
-mkosi dependencies change! If you experience any mkosi error or have any
-doubt then use `pipx` to `uninstall` and re-install.
-
-Alternatively, can try to add `mkosi/bin/mkosi` to your PATH or a create a
-symlink to it instead of using `pipx`. This seems to work with mkosi
-releases v15 and above.
-
-`mkosi/README.md` describes more installation alternatives. Note they can
-differ across mkosi versions.
-
-
-## mkosi v15+ (Fedora 39+)
-
-mkosi v15 made a lot of backwards-incompatible changes. run_qemu has
-configuration files for both mkosi v14- and mkosi v15+ now but please
-report any bug.
-
-To mitigate this, Fedora 40 packages both mkosi 14 and 22. So, it is not
-required to clone and and run mkosi from source to switch between these
-two versions. Instead:
+Example using a kernel.org maintainer tree:
 
 ```
-# dnf remove --noautoremove mkosi
-# dnf install mkosi14
+kernel_repo: https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git
+kernel_branch: next
+ndctl_repo: pmem/ndctl
+ndctl_branch: pending
+timeout_min: 35
 ```
 
-Fedora 41 has stopped packaging mkosi14.
+
+## Running From The Command Line
+
+Tests can also be triggered from the command line using the GitHub CLI.
+
+Install the GitHub CLI and authenticate:
+
+```
+gh auth login
+```
+
+Run the workflow:
+
+```
+gh workflow run "CXL test runner" \
+  --repo yourname/cxl-test-runner \
+  -f kernel_repo=yourname/linux \
+  -f kernel_branch=cxl-feature-branch
+```
+
+Example using the CXL maintainer tree:
+
+```
+gh workflow run "CXL test runner" \
+  --repo yourname/cxl-test-runner \
+  -f kernel_repo=https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git \
+  -f kernel_branch=fixes
+```
+
+Watch the run:
+
+```
+gh run watch
+```
 
 
-### mkosi configuration files in run_qemu
+## Example Test Output
 
-Fortunately, the location of mkosi configuration files changed at the same
-v15 time. So `run_qemu.sh` creates a different mkosi configuration folder depending
-on which mkosi version is detected: `qbuild/mkosi.default.d/*.conf` for
-version 14 and before versus  `qbuild/mkosi.conf.d/*.conf` for version 15
-and above.
+The workflow summary displays the results of each CXL test.
 
-While no such major break of backwards compatibility has happened after v15
-(yet?), mkosi development is very fast-paced. Various Linux distributions come
-with various mkosi versions. So try to keep mkosi configuration(s) as simple as
-possible to avoid accidentally breaking someone else using a different mkosi
-version. Rely on mkosi default values as much as possible.
+Example:
 
-Fortunately, most mkosi versions are thoroughly documented and you can
-easily check the documentation of any version without installing anything.
+```
+1/13 ndctl:cxl / cxl-topology.sh        OK
+2/13 ndctl:cxl / cxl-region-sysfs.sh    OK
+3/13 ndctl:cxl / cxl-labels.sh          OK
+4/13 ndctl:cxl / cxl-create-region.sh   OK
+5/13 ndctl:cxl / cxl-xor-region.sh      OK
+...
+13/13 ndctl:cxl / cxl-poison.sh         OK
 
-- For versions 14 and before, use this syntax:
-  https://github.com/systemd/mkosi/blob/v14/man/mkosi.1
-- For versions between 15 and 24 go to:
-  https://github.com/systemd/mkosi/blob/v15/mkosi/resources/mkosi.md
-- For versions 25 and above:
-  https://github.com/systemd/mkosi/blob/v25/mkosi/resources/man/mkosi.1.md
+Ok:                 13
+Fail:               0
+Skipped:            0
+```
+
+Detailed logs are also uploaded as workflow artifacts.
+
+
+## Automatically Trigger Tests From Your Kernel Repository
+
+Developers may configure their kernel repository to automatically trigger
+the CXL test runner whenever commits are pushed.
+
+Create the file:
+
+```
+.github/workflows/cxl-test.yml
+```
+
+Example workflow:
+
+```
+name: run CXL tests
+
+on:
+  push:
+    branches:
+      - cxl-*
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger CXL test runner
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        run: |
+          gh workflow run "CXL test runner" \
+            --repo yourname/cxl-test-runner \
+            -f kernel_repo=${{ github.repository }} \
+            -f kernel_branch=${{ github.ref_name }}
+```
+
+
+## Overview
+
+This project builds on the run_qemu.sh testing environment and packages
+it into a reproducible GitHub Actions workflow.
+
+The runner performs the following steps:
+
+1. Checkout the requested kernel repository and branch
+2. Checkout the requested ndctl repository and branch
+3. Build the kernel
+4. Boot the kernel using run_qemu.sh
+5. Execute the CXL unit tests
+6. Publish logs and test summaries
+
+
+## Test Environment
+
+The workflow currently runs with the following configuration:
+
+```
+GitHub runner: ubuntu-24.04
+Architecture:  x86_64
+mkosi image:   ubuntu noble
+```
+
+
+## Relationship to run_qemu.sh
+
+https://github.com/pmem/run_qemu
+
+This project builds on the run_qemu.sh infrastructure originally
+developed by Vishal Verma and expanded upon by Marc Herbert.
+
+run_qemu.sh provides a flexible environment for running CXL and NVDIMM
+tests in QEMU.
+
+While cxl-test-runner focuses on automated GitHub testing, developers
+who want full control over the environment can run run_qemu.sh locally to:
+
+- debug failures interactively
+- experiment with different CXL topologies
+- develop new tests
+- explore advanced QEMU configurations
