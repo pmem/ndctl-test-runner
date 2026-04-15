@@ -10,9 +10,42 @@ on:
 run-name: "linux-next/master (${{ github.event_name }})"
 
 jobs:
-  # linux-next changes daily — always run, no SHA check needed.
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changed.outputs.value }}
+      sha:     ${{ steps.sha.outputs.value }}
+    steps:
+      - name: fetch kernel HEAD
+        id: sha
+        run: |
+          sha=$(git ls-remote \
+            https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git \
+            refs/heads/master | awk '{print $1}')
+          echo "value=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: check if already tested
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/.ndctl-tested
+          key: tested-linux-next-master-${{ steps.sha.outputs.value }}
+          lookup-only: true
+
+      - name: set changed output
+        id: changed
+        run: |
+          if [[ "${{ steps.cache.outputs.cache-hit }}" == "true" ]]; then
+            echo "value=false" >> "$GITHUB_OUTPUT"
+            echo "linux-next/master unchanged (SHA: ${{ steps.sha.outputs.value }}) — skipping"
+          else
+            echo "value=true" >> "$GITHUB_OUTPUT"
+            echo "linux-next/master new SHA: ${{ steps.sha.outputs.value }} — running"
+          fi
 
   test:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
     uses: ./.github/workflows/main.yml
     with:
       kernel_repo:   "https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git"
@@ -21,3 +54,14 @@ jobs:
       ndctl_branch:  "pending"
       test_suite:    "all"
       timeout_min:   "45"
+
+  mark:
+    needs: [check, test]
+    if: needs.test.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ needs.check.outputs.sha }}" > /tmp/.ndctl-tested
+      - uses: actions/cache/save@v4
+        with:
+          path: /tmp/.ndctl-tested
+          key: tested-linux-next-master-${{ needs.check.outputs.sha }}
