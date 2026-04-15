@@ -7,10 +7,10 @@ on:
     inputs:
       kernel_repo:
         description: "Kernel repo: owner/name OR full git URL"
-        default: "AlisonSchofield/linux-kernel"
+        default: "https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git"
       kernel_branch:
         description: "Kernel branch (or tag/SHA)"
-        default: "cxl-testme"
+        default: "master"
       ndctl_repo:
         description: "ndctl repo: owner/name OR full git URL"
         default: "pmem/ndctl"
@@ -28,10 +28,10 @@ on:
     inputs:
       kernel_repo:
         type: string
-        default: "AlisonSchofield/linux-kernel"
+        default: "https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git"
       kernel_branch:
         type: string
-        default: "cxl-testme"
+        default: "master"
       ndctl_repo:
         type: string
         default: "pmem/ndctl"
