@@ -13,8 +13,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     outputs:
-      changed: ${{ steps.changed.outputs.value }}
-      sha:     ${{ steps.sha.outputs.value }}
+      changed:   ${{ steps.changed.outputs.value }}
+      sha:       ${{ steps.sha.outputs.value }}
+      ndctl_sha: ${{ steps.ndctl_sha.outputs.value }}
     steps:
       - name: fetch kernel HEAD
         id: sha
@@ -24,12 +25,20 @@ jobs:
             refs/heads/master | awk '{print $1}')
           echo "value=$sha" >> "$GITHUB_OUTPUT"
 
+      - name: fetch ndctl HEAD
+        id: ndctl_sha
+        run: |
+          sha=$(git ls-remote \
+            https://github.com/pmem/ndctl.git \
+            refs/heads/pending | awk '{print $1}')
+          echo "value=$sha" >> "$GITHUB_OUTPUT"
+
       - name: check if already tested
         id: cache
         uses: actions/cache/restore@v4
         with:
           path: /tmp/.ndctl-tested
-          key: tested-linux-next-master-${{ steps.sha.outputs.value }}
+          key: tested-linux-next-master-${{ steps.sha.outputs.value }}-${{ steps.ndctl_sha.outputs.value }}
           lookup-only: true
 
       - name: set changed output
@@ -37,10 +46,10 @@ jobs:
         run: |
           if [[ "${{ steps.cache.outputs.cache-hit }}" == "true" ]]; then
             echo "value=false" >> "$GITHUB_OUTPUT"
-            echo "linux-next/master unchanged (SHA: ${{ steps.sha.outputs.value }}) — skipping"
+            echo "linux-next/master unchanged (kernel: ${{ steps.sha.outputs.value }}, ndctl: ${{ steps.ndctl_sha.outputs.value }}) — skipping"
           else
             echo "value=true" >> "$GITHUB_OUTPUT"
-            echo "linux-next/master new SHA: ${{ steps.sha.outputs.value }} — running"
+            echo "linux-next/master changed (kernel: ${{ steps.sha.outputs.value }}, ndctl: ${{ steps.ndctl_sha.outputs.value }}) — running"
           fi
 
   test:
@@ -64,4 +73,4 @@ jobs:
       - uses: actions/cache/save@v4
         with:
           path: /tmp/.ndctl-tested
-          key: tested-linux-next-master-${{ needs.check.outputs.sha }}
+          key: tested-linux-next-master-${{ needs.check.outputs.sha }}-${{ needs.check.outputs.ndctl_sha }}
