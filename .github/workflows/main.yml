@@ -130,7 +130,8 @@ jobs:
 
       - name: apt install ndctl build dependencies
         run: |
-          grep -vE '^[[:blank:]]*#' .github/workflows/ubuntu-ndctl-build-deps | \
+          set -o pipefail
+          grep -vE '^[[:blank:]]*#' run_qemu/.github/workflows/ubuntu-ndctl-build-deps | \
           xargs sudo apt install -y
 
       - name: argbash
