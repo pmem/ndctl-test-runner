@@ -388,7 +388,16 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: fail build on unit test failures
+        if: always()
+        run: |
+          if grep -qE 'Fail:[[:blank:]]+[^0[:blank:]]' /tmp/rq_0.log 2>/dev/null; then
+            echo "Unit test failures detected — failing build"
+            exit 1
+          fi
+
       - name: ccache stats
+        if: always()
         run: |
           ccache --show-stats
           ccache --show-config | grep dir || true
