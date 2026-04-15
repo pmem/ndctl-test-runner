@@ -14,12 +14,10 @@ rootfssize="10G"
 espsize="512M"
 
 nvme_size="1G"
-efi_mem_size="2"   #in GiB
 legacy_pmem_size="2"   #in GiB
 pmem_size="16384"  #in MiB
 pmem_label_size=2  #in MiB
 pmem_final_size="$((pmem_size + pmem_label_size))"
-: "${gdb:=gdb}"
 : "${ndctl:=$(readlink -e ~/git/ndctl)}"
 selftests_home=root/built-selftests
 : "${mkosi_bin:=mkosi}"
@@ -138,6 +136,58 @@ arch_init()
 }
 
 script_dir="$(cd "$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")" && pwd)"
+_rq_test_profile=""
+_rq_test_name=""
+_rq_test_meson_args=""
+
+normalize_test_runner_args()
+{
+	local have_nvdimm=0 have_dax=0 have_cxl=0
+	normalized_args=()
+
+	while (($#)); do
+		case "$1" in
+			--cxl-test-run)
+				have_cxl=1
+				normalized_args+=("--cxl-test")
+				;;
+			--nfit-test-run|--nvdimm-test-run)
+				have_nvdimm=1
+				normalized_args+=("--nfit-test")
+				;;
+			--dax-test-run)
+				have_dax=1
+				normalized_args+=("--cxl-test" "--nfit-test")
+				;;
+			--all-test-run)
+				have_nvdimm=1
+				have_dax=1
+				have_cxl=1
+				normalized_args+=("--cxl-test" "--nfit-test")
+				;;
+			*)
+				normalized_args+=("$1")
+				;;
+		esac
+		shift
+	done
+
+	if (( have_nvdimm && have_dax && have_cxl )); then
+		_rq_test_profile="all"
+	elif (( have_nvdimm || have_dax || have_cxl )); then
+		local profile_parts=()
+		(( have_nvdimm )) && profile_parts+=("nvdimm")
+		(( have_dax )) && profile_parts+=("dax")
+		(( have_cxl )) && profile_parts+=("cxl")
+		_rq_test_profile="${profile_parts[*]}"
+	else
+		_rq_test_profile=""
+	fi
+}
+
+normalize_test_runner_args "$@"
+set -- "${normalized_args[@]}"
+
 parser_generator="${script_dir}/parser_generator.m4"
 parser_lib="${script_dir}/run_qemu_parser.sh"
 if [ ! -e "$parser_lib" ] || [ "$parser_generator" -nt "$parser_lib" ]; then
@@ -152,14 +202,16 @@ fi
 
 if [ ${_arg_working_dir:0:1} == "-" ]; then
 	printf "Invalid option '%s'\n" "$_arg_working_dir"
-	printf "Try 'run_qemu.sh --help' for more information.\n"
+	printf "Try 'run_qemu_ci.sh --help' for more information.\n"
 	exit 1
 fi
 
-cxl_test_script="$script_dir/scripts/rq_cxl_tests.sh"
-cxl_results_script="$script_dir/scripts/rq_cxl_results.sh"
-nfit_test_script="$script_dir/scripts/rq_nfit_tests.sh"
-nfit_results_script="$script_dir/scripts/rq_nfit_results.sh"
+ndctl_test_script="$script_dir/scripts/rq_ndctl_tests.sh"
+ndctl_results_script="$script_dir/scripts/rq_ndctl_results.sh"
+cxl_test_script="$ndctl_test_script"
+cxl_results_script="$ndctl_results_script"
+nfit_test_script="$ndctl_test_script"
+nfit_results_script="$ndctl_results_script"
 
 # /etc/os-release is what mkosi "detect_distribution()" uses too.
 get_os()
@@ -356,7 +408,6 @@ set_topology()
 		num_nodes=1
 		num_mems=0
 		num_pmems=0
-		num_efi_mems=0
 		num_legacy_pmems=0
 		;;
 	2S0|small0)
@@ -364,7 +415,6 @@ set_topology()
 		num_nodes=2
 		num_mems=0
 		num_pmems=2
-		num_efi_mems=0
 		num_legacy_pmems=0
 		;;
 	2S|small)
@@ -372,7 +422,6 @@ set_topology()
 		num_nodes=2
 		num_mems=2
 		num_pmems=2
-		num_efi_mems=1
 		num_legacy_pmems=1
 		;;
 	2S4|med*)
@@ -380,7 +429,6 @@ set_topology()
 		num_nodes=2
 		num_mems=4
 		num_pmems=4
-		num_efi_mems=1
 		num_legacy_pmems=2
 		;;
 	4S|large)
@@ -388,7 +436,6 @@ set_topology()
 		num_nodes=4
 		num_mems=4
 		num_pmems=4
-		num_efi_mems=2
 		num_legacy_pmems=2
 		;;
 	8S|huge)
@@ -396,7 +443,6 @@ set_topology()
 		num_nodes=8
 		num_mems=8
 		num_pmems=8
-		num_efi_mems=2
 		num_legacy_pmems=2
 		;;
 	16S|insane)
@@ -404,7 +450,6 @@ set_topology()
 		num_nodes=16
 		num_mems=0
 		num_pmems=16
-		num_efi_mems=2
 		num_legacy_pmems=2
 		;;
 	16Sb|broken)
@@ -412,7 +457,6 @@ set_topology()
 		num_nodes=16
 		num_mems=0
 		num_pmems=32
-		num_efi_mems=2
 		num_legacy_pmems=2
 		;;
 	gcp)
@@ -420,7 +464,6 @@ set_topology()
 		num_nodes=1
 		num_mems=0
 		num_pmems=0
-		num_efi_mems=0
 		num_legacy_pmems=0
 		;;
 	*)
@@ -442,9 +485,6 @@ set_topology()
 	if [[ "$_arg_pmems" ]]; then
 		num_pmems="$_arg_pmems"
 	fi
-	if [[ "$_arg_efi_mems" ]]; then
-		num_efi_mems="$_arg_efi_mems"
-	fi
 	if [[ "$_arg_legacy_pmems" ]]; then
 		num_legacy_pmems="$_arg_legacy_pmems"
 	fi
@@ -460,40 +500,94 @@ process_options_logic()
 
 	arch_init
 
-	if [[ $_arg_cxl_test_run == "on" ]]; then
-		_arg_cxl_debug="on"
-		_arg_cxl_test="on"
+	if [[ -z $_rq_test_profile ]]; then
+		if [[ $_arg_cxl_test_run == "on" ]]; then
+			_rq_test_profile="cxl"
+		elif [[ $_arg_nfit_test_run == "on" ]]; then
+			_rq_test_profile="nvdimm"
+		fi
+	fi
+
+	if [[ -n $_rq_test_profile ]]; then
+		local have_nvdimm=0 have_dax=0 have_cxl=0 profile_token
+
+		# ndctl test-run profiles use mock devices from the test modules.
+		# Do not enable QEMU CXL devices or machine cxl=on for these runs.
+		_arg_cxl="off"
+
+		for profile_token in $_rq_test_profile; do
+			case "$profile_token" in
+				all)
+					have_nvdimm=1
+					have_dax=1
+					have_cxl=1
+					;;
+				nvdimm)
+					have_nvdimm=1
+					;;
+				dax)
+					have_dax=1
+					;;
+				cxl)
+					have_cxl=1
+					;;
+				*)
+					fail 'Unknown ndctl test profile token: %s' "$profile_token"
+					;;
+			esac
+		done
+
+		_rq_test_name=""
+		_rq_test_meson_args=""
+
+		if (( have_cxl )); then
+			# _arg_cxl_debug="on"
+			_arg_cxl_test="on"
+			_rq_test_name+=" CXL"
+			_rq_test_meson_args+=" --suite=ndctl:cxl"
+		fi
+		if (( have_nvdimm )); then
+			_arg_nfit_test="on"
+			set_topology "med"
+			_rq_test_name+=" NVDIMM"
+			_rq_test_meson_args+=" --suite=ndctl:ndctl"
+		fi
+		if (( have_dax )); then
+			_arg_cxl_test="on"
+			_arg_nfit_test="on"
+			set_topology "med"
+			_rq_test_name+=" DAX"
+			_rq_test_meson_args+=" --suite=ndctl:dax"
+		fi
+
+		_rq_test_name=${_rq_test_name# }
+		_rq_test_meson_args=${_rq_test_meson_args# }
+
+		if (( have_nvdimm && have_dax && have_cxl )); then
+			_rq_test_name="ALL"
+			_rq_test_meson_args=""
+		fi
+
+		if [[ $_arg_timeout == "0" ]]; then
+			if (( have_cxl && ! have_nvdimm && ! have_dax )); then
+				_arg_timeout="15"
+			else
+				_arg_timeout="20"
+			fi
+		fi
+
 		if [[ ! $_arg_autorun ]]; then
-			_arg_autorun="$cxl_test_script"
+			_arg_autorun="$ndctl_test_script"
 		fi
 		if [[ ! $_arg_post_script ]]; then
-			_arg_post_script="$cxl_results_script"
+			_arg_post_script="$ndctl_results_script"
 		fi
 		if [[ ! $_arg_log ]]; then
 			_arg_log="/tmp/rq_${_arg_instance}.log"
-		fi
-		if [[ $_arg_timeout == "0" ]]; then
-			_arg_timeout="15"
 		fi
 	fi
 	if [[ $_arg_cxl_test == "on" ]]; then
 		check_ndctl_dir
-	fi
-	if [[ $_arg_nfit_test_run == "on" ]]; then
-		_arg_nfit_test="on"
-		set_topology "med"
-		if [[ ! $_arg_autorun ]]; then
-			_arg_autorun="$nfit_test_script"
-		fi
-		if [[ ! $_arg_post_script ]]; then
-			_arg_post_script="$nfit_results_script"
-		fi
-		if [[ ! $_arg_log ]]; then
-			_arg_log="/tmp/rq_${_arg_instance}.log"
-		fi
-		if [[ $_arg_timeout == "0" ]]; then
-			_arg_timeout="20"
-		fi
 	fi
 
 	[[ $_arg_legacy_bios == 'on' ]] || edk2_vmf_configure
@@ -535,9 +629,6 @@ process_options_logic()
 	fi
 	if [[ $_arg_kcmd_append && ! -f "$_arg_kcmd_append" ]]; then
 		fail "File where appended kernel command line resides not found: $_arg_kcmd_append not in $(pwd). Do not pass in a string!"
-	fi
-	if [[ $_arg_gdb_qemu == "on" ]] && [[ $gdb == "gdb" ]]; then
-		gdb_extra=("-ex" "handle SIGUSR1 noprint nostop")
 	fi
 	if [[ $_arg_timeout -gt 0 ]]; then
 		if [[ ! -x "$qmp" ]]; then
@@ -690,10 +781,6 @@ __build_kernel()
 		make $quiet -j"$num_build_cpus" -C tools/testing/selftests install INSTALL_PATH="$selftests_dir"
 	fi
 
-	if [[ $_arg_gdb == "on" ]]; then
-		make $quiet scripts_gdb
-	fi
-
 	if (( _arg_quiet >= 1 )); then
 		install_build_initrd > /dev/null
 	else
@@ -764,6 +851,25 @@ setup_autorun()
 		systemd_preset enable rq-custom.target
 		systemd_preset enable rq_autorun.service
 	fi
+}
+
+setup_ndctl_test_profile()
+{
+	local prefix="$1"
+	local conf_dir="$prefix/etc/default"
+	local conf_file="$conf_dir/rq_ndctl_test.conf"
+
+	if [[ -z $_rq_test_profile ]]; then
+		rm -f "$conf_file"
+		return
+	fi
+
+	mkdir -p "$conf_dir"
+	cat <<- EOF > "$conf_file"
+		NDCTL_TEST_PROFILE='$_rq_test_profile'
+		NDCTL_TEST_NAME='$_rq_test_name'
+		NDCTL_TEST_MESON_ARGS='$_rq_test_meson_args'
+	EOF
 }
 
 
@@ -841,15 +947,9 @@ build_kernel_cmdline()
 		"root=$root"
 		"ignore_loglevel"
 		"rw"
-		"initcall_debug"
 		"log_buf_len=20M"
 		"memory_hotplug.memmap_on_memory=force"
 	)
-	if [[ $_arg_gdb == "on" ]]; then
-		kcmd+=( 
-			"nokaslr"
-		)
-	fi
 	if [[ $_arg_cxl_debug == "on" ]]; then
 		kcmd+=( 
 			"cxl_acpi.dyndbg=+fplm"
@@ -888,7 +988,6 @@ build_kernel_cmdline()
 		num_legacy_pmems=0
 		kcmd+=( 
 			"memmap=3G!6G,1G!9G"
-			"efi_fake_mem=2G@10G:0x40000"
 			"default_hugepagesz=1G hugepagesz=1G hugepages=2"
 		)
 	fi
@@ -917,20 +1016,6 @@ build_kernel_cmdline()
 		pmems_str="$(printf "%s," "${legacy_pmems[@]}")"
 		pmems_str="${pmems_str%,}"
 		kcmd+=( "memmap=$pmems_str" )
-	fi
-
-	if (( num_efi_mems > 0 )); then
-		reserve="$((num_efi_mems * efi_mem_size))"  # in GiB
-		start="$((tot_mem - reserve))"  #in GiB
-		declare -a efi_mems
-		cur="$start"
-		for (( i = 0; i < num_efi_mems; i++ )); do
-			cur=$((cur + (i * efi_mem_size)))
-			efi_mems[$i]="${efi_mem_size}G@${cur}G:0x40000"
-		done
-		efi_mems_str="$(printf "%s," "${efi_mems[@]}")"
-		efi_mems_str="${efi_mems_str%,}"
-		kcmd+=( "efi_fake_mem=$efi_mems_str" )
 	fi
 
 	# process kcmd replacement
@@ -1181,6 +1266,8 @@ __update_existing_rootfs()
 	sudo -E bash $_trace_sh -c "$(declare -f setup_depmod); _arg_nfit_test=$_arg_nfit_test; _arg_cxl_test=$_arg_cxl_test; kver=$kver; setup_depmod $inst_prefix"
 	#shellcheck disable=SC2086
 	sudo -E bash -e $_trace_sh -c "$(declare -f setup_autorun); _arg_autorun=$_arg_autorun; setup_autorun $inst_prefix"
+	#shellcheck disable=SC2086
+	sudo -E bash -e $_trace_sh -c "$(declare -f setup_ndctl_test_profile); _rq_test_profile=$_rq_test_profile; _rq_test_name=$_rq_test_name; _rq_test_meson_args=$_rq_test_meson_args; setup_ndctl_test_profile $inst_prefix"
 
 	umount_rootfs 2
 }
@@ -1222,18 +1309,6 @@ EOFPRESET
 	} > "$preset_dir/04-run_qemu-$servicename.preset"
 }
 
-setup_network()
-{
-	mkdir -p mkosi.extra/etc/systemd/network
-	cat <<- EOF > mkosi.extra/etc/systemd/network/20-wired.network
-		[Match]
-		Name=en*
-
-		[Network]
-		DHCP=yes
-	EOF
-}
-
 check_ndctl_dir()
 {
 	[ -f "$ndctl/meson.build" ] ||
@@ -1249,20 +1324,14 @@ prepare_ndctl_build()
 		# .postinst and others moved outside container in mkosi v15, see
 		# https://github.com/systemd/mkosi/commit/9b626c647037bc8a
 		if [ -n "$container" ]; then # before mkosi v15
-			/root/reinstall_ndctl.sh
+			cd /root/ndctl
+			rm -rf build
+			meson setup -Dtest=enabled -Ddestructive=enabled -Ddocs=disabled build
+			meson compile -C build
+			meson install -C build
 		else # mkosi v15 and above
-			# The magic, short-lived $SCRIPT variable is already deprecated
-			# and we don't need it.
-			mkosi-chroot /root/reinstall_ndctl.sh
+			mkosi-chroot sh -c 'cd /root/ndctl && rm -rf build && meson setup -Dtest=enabled -Ddestructive=enabled -Ddocs=disabled build && meson compile -C build && meson install -C build'
 		fi
-	EOF
-}
-
-prepare_shadow_autologin()
-{
-	cat <<- EOF | postinst_append_if_not_found  shadow_autologin.sh
-		#!/bin/sh
-		trusted_console=$console mkosi-chroot /root/rq/shadow_autologin.sh
 	EOF
 }
 
@@ -1275,7 +1344,7 @@ postinst_append_if_not_found()
 	local _outputf=mkosi.postinst
 	# Until mkosi v18 (commit a28c268996fa),  only one postinst script is
 	# supported. So, we concatenate. One drawback:  you must manually delete
-	# qbuild/mkosi.postinst when changing run_qemu.sh
+	# qbuild/mkosi.postinst when changing run_qemu_ci.sh
 	if test -e "$_outputf" && grep -q -e "$watermark" "$_outputf"; then
 		cat >/dev/null
 		return
@@ -1285,21 +1354,6 @@ postinst_append_if_not_found()
 	  printf '###  -----------------------\n\n'
 	} >> "$_outputf"
 	chmod +x "$_outputf"
-}
-
-setup_gcp_tweaks()
-{
-	mkdir -p mkosi.extra/etc/ssh/sshd_config.d/
-	cat <<- EOF >  mkosi.extra/etc/ssh/sshd_config
-		Include /etc/ssh/sshd_config.d/*.conf
-		AuthorizedKeysFile	.ssh/authorized_keys
-		Subsystem	sftp	/usr/libexec/openssh/sftp-server
-		UsePAM no
-		PasswordAuthentication no
-		PermitEmptyPasswords no
-		PermitRootLogin prohibit-password
-	EOF
-	chmod go-rw mkosi.extra/etc/ssh/sshd_config
 }
 
 # "... generated by ... from $1 ..."
@@ -1387,16 +1441,12 @@ make_rootfs()
 		process_mkosi_template "$tmpl" > "$dst"
 	done
 
-	rsync -a "${script_dir}"/mkosi/extra/  mkosi.extra/
+	mkdir -p mkosi.extra/root mkosi.extra/etc
 
-	# misc rootfs setup
-	mkdir -p mkosi.extra/root/.ssh
-	local pubk
-	for pubk in ~/.ssh/*.pub; do
-		if test -e "${pubk%.pub}"; then
-			cat "${pubk}"
-		fi
-	done > mkosi.extra/root/.ssh/authorized_keys
+	if [ -d "${script_dir}/mkosi/extra" ]; then
+		rsync -a "${script_dir}/mkosi/extra/" mkosi.extra/
+	fi
+
 	chmod -R go-rwx mkosi.extra/root
 
 	rootfs_script="${script_dir}/${_distro}_rootfs.sh"
@@ -1404,33 +1454,12 @@ make_rootfs()
 	# shellcheck source=arch_rootfs.sh
 	[ -f "$rootfs_script" ] && source "$rootfs_script" mkosi.extra/
 
-	if [ -f ~/.bashrc ]; then
-		rsync "${rsync_opts[@]}" ~/.bash* mkosi.extra/root/
-	fi
-	if [ -f ~/.vimrc ]; then
-		rsync "${rsync_opts[@]}" ~/.vim* mkosi.extra/root/
-	fi
-	mkdir -p mkosi.extra/root/bin
-	if [ -d ~/git/extra-scripts ]; then
-		rsync "${rsync_opts[@]}" ~/git/extra-scripts/bin/* mkosi.extra/root/bin/
-	fi
 	if [[ $_arg_ndctl_build == "on" ]]; then
 		if [ -n "$ndctl" ]; then
 			rsync "${rsync_opts[@]}" "$ndctl/" mkosi.extra/root/ndctl
 			prepare_ndctl_build # create mkosi.postinst which compiles
 		fi
 	fi
-
-	case "$_distro" in
-	    debian|ubuntu)
-		# "set_credential login.noauth" is recognized by util-linux "login" but not by
-		# https://github.com/shadow-maint/shadow login program, see
-		# https://github.com/pmem/run_qemu/issues/169. So we hack the PAM configuration
-		# instead.
-		if test "$mkosi_ver" -ge 15; then
-		    prepare_shadow_autologin
-		fi ;;
-	esac
 
 	# timedatectl defaults to UTC when /etc/localtime is missing
 	local bld_tz; bld_tz=$( timedatectl | awk '/zone:/ { print $3 }' )
@@ -1447,18 +1476,6 @@ make_rootfs()
 		sleep 3
 	fi
 
-	if [[ $_arg_gcp == "on" ]]; then
-		setup_gcp_tweaks
-	fi
-
-	# enable ssh
-	systemd_preset enable sshd.service
-
-	# These are needed for Arch only, but didn't seem to have any adverse effect on Fedora
-	systemd_preset enable systemd-networkd.service
-	systemd_preset enable systemd-resolved.service
-	setup_network
-
 	# this is effectively 'daxctl migrate-device-model'
 	mkdir -p mkosi.extra/etc/modprobe.d
 	cat <<- EOF > mkosi.extra/etc/modprobe.d/daxctl.conf
@@ -1468,6 +1485,7 @@ make_rootfs()
 
 	setup_depmod "mkosi.extra"
 	setup_autorun "mkosi.extra"
+	setup_ndctl_test_profile "mkosi.extra"
 
 	if [[ $_arg_debug == "on" ]]; then
 		if test "$mkosi_ver" -lt 15; then
@@ -1844,9 +1862,6 @@ prepare_qcmd()
 	sockets=$num_nodes
 	smp=$((sockets * cores * threads))
 
-	if [[ $_arg_gdb_qemu == "on" ]]; then
-		qcmd=("$gdb" "${gdb_extra[@]}" "--args")
-	fi
 	qcmd+=("$qemu")
 
 	# setup machine_args
@@ -1919,18 +1934,6 @@ prepare_qcmd()
 		qcmd+=("-append" "${kcmd[*]}")
 	fi
 
-	hostport="$((10022 + _arg_instance))"
-	if [ "$hostport" -gt 65535 ]; then
-		fail "run_qemu: instance ID too high, port overflows 65535"
-	fi
-	mac_lower=$(printf "%06x" "$((_arg_instance + 0x123456))")
-	guestmac=("52" "54" "00")
-	[[ $mac_lower =~ (..)(..)(..) ]] && guestmac+=("${BASH_REMATCH[@]:1}")
-	mac_addr=$(IFS=:; echo "${guestmac[*]}")
-
-	qcmd+=("-device" "e1000,netdev=net0,mac=$mac_addr")
-	qcmd+=("-netdev" "user,id=net0,hostfwd=tcp::$hostport-:22")
-
 	if [[ $_arg_kvm = "on" ]]; then
 	# Use host CPU capability
 		qcmd+=("-cpu" "host")
@@ -1956,9 +1959,6 @@ prepare_qcmd()
 		qcmd+=("-snapshot")
 	fi
 
-	if [ "$_arg_gdb" == "on" ]; then
-		qcmd+=("-gdb" "tcp::10000" "-S")
-	fi
 
 	# cpu + mem nodes (i.e. the --nodes option)
 	for (( i = 0; i < num_nodes; i++ )); do
