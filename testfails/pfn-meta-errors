@@ -1,0 +1,10 @@
+Test: ndctl:ndctl / pfn-meta-errors.sh
+Result: FAIL, exit status 1, ~3.7s
+Seen in: nvdimm/for-next, nvdimm/fixes, cxl/next, cxl/fixes, linux-next/master
+
+From meson summary:
+  20/36 ndctl:ndctl / pfn-meta-errors.sh     FAIL             3.73s   exit status 1
+
+Per-test output not available in console log; stored in testlog.txt artifact.
+Artifact upload failed for for-next/cxl-next jobs (409 conflict -- duplicate name).
+Artifact for fixes jobs uploaded successfully.

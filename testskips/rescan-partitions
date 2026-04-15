@@ -1,0 +1,3 @@
+Test: ndctl:ndctl / rescan-partitions.sh
+Result: SKIP, exit status 77, ~0.4s
+Seen in: nvdimm/for-next, nvdimm/fixes, linux-next/master

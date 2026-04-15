@@ -1,0 +1,9 @@
+Test: ndctl:dax / dax-ext4.sh
+Result: FAIL, exit status 1, ~1.5s
+Seen in: nvdimm/for-next, nvdimm/fixes, cxl/next, cxl/fixes, linux-next/master
+
+From meson summary:
+  26/36 ndctl:dax / dax-ext4.sh              FAIL             1.57s   exit status 1
+
+Fast failure (~1.5s) suggests early exit, likely a prerequisite or device check.
+Per-test output not available in console log; stored in testlog.txt artifact.

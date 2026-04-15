@@ -1,0 +1,67 @@
+---
+name: cxl/fixes
+
+# yamllint disable-line rule:truthy
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 10 pm PST (UTC-8)
+  workflow_dispatch:
+
+run-name: "cxl/fixes (${{ github.event_name }})"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changed.outputs.value }}
+      sha:     ${{ steps.sha.outputs.value }}
+    steps:
+      - name: fetch kernel HEAD
+        id: sha
+        run: |
+          sha=$(git ls-remote \
+            https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git \
+            refs/heads/fixes | awk '{print $1}')
+          echo "value=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: check if already tested
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/.ndctl-tested
+          key: tested-cxl-fixes-${{ steps.sha.outputs.value }}
+          lookup-only: true
+
+      - name: set changed output
+        id: changed
+        run: |
+          if [[ "${{ steps.cache.outputs.cache-hit }}" == "true" ]]; then
+            echo "value=false" >> "$GITHUB_OUTPUT"
+            echo "cxl/fixes unchanged (SHA: ${{ steps.sha.outputs.value }}) — skipping"
+          else
+            echo "value=true" >> "$GITHUB_OUTPUT"
+            echo "cxl/fixes new SHA: ${{ steps.sha.outputs.value }} — running"
+          fi
+
+  test:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
+    uses: ./.github/workflows/main.yml
+    with:
+      kernel_repo:   "https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git"
+      kernel_branch: "fixes"
+      ndctl_repo:    "pmem/ndctl"
+      ndctl_branch:  "pending"
+      test_suite:    "cxl"
+      timeout_min:   "35"
+
+  mark:
+    needs: [check, test]
+    if: needs.test.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ needs.check.outputs.sha }}" > /tmp/.ndctl-tested
+      - uses: actions/cache/save@v4
+        with:
+          path: /tmp/.ndctl-tested
+          key: tested-cxl-fixes-${{ needs.check.outputs.sha }}

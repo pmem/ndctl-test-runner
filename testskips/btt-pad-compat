@@ -1,0 +1,3 @@
+Test: ndctl:ndctl / btt-pad-compat.sh
+Result: SKIP, exit status 77, ~0.3s
+Seen in: nvdimm/for-next, nvdimm/fixes, linux-next/master

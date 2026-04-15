@@ -1,0 +1,3 @@
+Test: ndctl:ndctl / btt-errors.sh
+Result: SKIP, exit status 77, ~4s
+Seen in: nvdimm/for-next, nvdimm/fixes, linux-next/master

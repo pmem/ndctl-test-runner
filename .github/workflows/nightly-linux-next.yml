@@ -1,0 +1,23 @@
+---
+name: linux-next/master
+
+# yamllint disable-line rule:truthy
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 10 pm PST (UTC-8)
+  workflow_dispatch:
+
+run-name: "linux-next/master (${{ github.event_name }})"
+
+jobs:
+  # linux-next changes daily — always run, no SHA check needed.
+
+  test:
+    uses: ./.github/workflows/main.yml
+    with:
+      kernel_repo:   "https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git"
+      kernel_branch: "master"
+      ndctl_repo:    "pmem/ndctl"
+      ndctl_branch:  "pending"
+      test_suite:    "all"
+      timeout_min:   "45"
