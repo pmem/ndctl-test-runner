@@ -1,49 +1,91 @@
 ---
-# Tools that can save round-trips to github and a lot of time:
-#
-# yamllint -f parsable pull_request.yml
-# pip3 install ruamel.yaml.cmd
-# yaml merge-expand pull_request.yml exp.yml &&
-#    diff -w -u pull_request.yml exp.yml
-#
-# github.com also has a powerful web editor that can be used without
-# committing.
+name: ndctl-test runner
 
-
-name: main test
-
-# 'workflow_dispatch' allows running this workflow manually from the
-# 'Actions' tab
 # yamllint disable-line rule:truthy
-on: [pull_request, workflow_dispatch, workflow_call]
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_repo:
+        description: "Kernel repo: owner/name OR full git URL"
+        default: "AlisonSchofield/linux-kernel"
+      kernel_branch:
+        description: "Kernel branch (or tag/SHA)"
+        default: "cxl-testme"
+      ndctl_repo:
+        description: "ndctl repo: owner/name OR full git URL"
+        default: "pmem/ndctl"
+      ndctl_branch:
+        description: "ndctl branch (or tag/SHA)"
+        default: "pending"
+      test_suite:
+        description: "Test suite: all, cxl, nvdimm, dax, 'nvdimm dax'"
+        default: "all"
+      timeout_min:
+        description: "Guest timeout (minutes)"
+        default: "35"
+
+  workflow_call:
+    inputs:
+      kernel_repo:
+        type: string
+        default: "AlisonSchofield/linux-kernel"
+      kernel_branch:
+        type: string
+        default: "cxl-testme"
+      ndctl_repo:
+        type: string
+        default: "pmem/ndctl"
+      ndctl_branch:
+        type: string
+        default: "pending"
+      test_suite:
+        type: string
+        default: "all"
+      timeout_min:
+        type: string
+        default: "35"
 
 jobs:
   build:
-    runs-on: ${{ matrix.cfg.os }}
+    runs-on: ubuntu-24.04
 
-    strategy:
-      fail-fast: false
-      # matrix is very flexible and not always "obvious"
-      # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflo
-      matrix:
-        # Keep it simple and just build "ourselves"
-        cfg:
-          - os: ubuntu-22.04
-            img_distro: ubuntu
-            img_rel: jammy
-          - os: ubuntu-24.04
-            img_distro: ubuntu
-            img_rel: noble
-        arch: [x86_64]
-        run_opts: [--cxl-test-run --ndctl-build]
+    env:
+      # Inputs
+      KERNEL_REPO: ${{ inputs.kernel_repo }}
+      KERNEL_BRANCH: ${{ inputs.kernel_branch }}
+      NDCTL_REPO: ${{ inputs.ndctl_repo }}
+      NDCTL_BRANCH: ${{ inputs.ndctl_branch }}
+      RUN_TIMEOUT_MIN: ${{ inputs.timeout_min }}
+      TEST_SUITE: ${{ inputs.test_suite }}
+
+      # Pinned image selection
+      MKOSI_DISTRO: ubuntu
+      MKOSI_RELEASE: noble
+
+      # Pinned runner identity strings (for output / cache keys)
+      RUNNER_OS_LABEL: ubuntu-24.04
+      ARCH_LABEL: x86_64
 
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout run_qemu (this repo)
+        uses: actions/checkout@v4
         with:
           path: run_qemu
 
-      # inspired by https://github.com/jlumbroso/free-disk-space/blob/main/action.yml
+      # Freeing disk space takes time. Check if needed.
+      - name: check free disk space
+        id: disk
+        shell: bash
+        run: |
+          set -euo pipefail
+          avail=$(df --output=avail -BG / | tail -1 | tr -dc '0-9')
+          echo "available_gb=$avail" >> "$GITHUB_OUTPUT"
+          echo "Free space: ${avail}G"
+          df -h
+
+      # Free disk space on GitHub runner
       - name: apt-get remove for disk space
+        if: ${{ steps.disk.outputs.available_gb < 20 }}
         run: |
           df -h
           sudo apt-get remove -y '^aspnetcore-.*' '^dotnet-.*'
@@ -55,6 +97,7 @@ jobs:
           df -h
 
       - name: rm -rf for disk space
+        if: ${{ steps.disk.outputs.available_gb < 20 }}
         run: |
           df -h
           sudo docker image prune --all --force || true
@@ -66,39 +109,30 @@ jobs:
 
       - name: apt install mkosi and run_qemu requirements
         run: |
-          # update is required first, see
-          # https://github.com/actions/runner-images/issues/2924
           sudo apt-get update
 
-          # Kernel deps
+          # Kernel build deps
           sudo apt install -y build-essential flex bison libelf-dev libssl-dev ccache
 
           # run_qemu deps
-          sudo apt install -y mkosi # this one pulls A LOT
+          sudo apt install -y mkosi
           sudo apt install -y dracut-core qemu-utils ovmf mtools qemu-system-x86
           pip3 install qemu.qmp
 
       - name: mkosi v20 fixes on Ubuntu 24.04
-        if: matrix.cfg.os  == 'ubuntu-24.04'
         run: |
           cd /usr/lib/python3/dist-packages
-          sudo git apply "${{ github.workspace }}"/run_qemu/Patches/ubuntu/24.04/mkosi/*.patch
+          sudo git apply "${{ github.workspace }}/run_qemu/Patches/ubuntu/24.04/mkosi/"*.patch
 
       - name: apt install Ubuntu 24.04 requirements for mkosi
-        if: matrix.cfg.os  == 'ubuntu-24.04'
         run: |
-           # systemd was monolithic in Ubunutu 22
-           sudo apt install -y systemd-ukify systemd-boot
+          sudo apt install -y systemd-ukify systemd-boot
 
       - name: apt install ndctl build dependencies
         run: |
-           grep -vE '^[[:blank:]]*#' .github/workflows/ubuntu-ndctl-build-deps |
-                    xargs sudo apt install -y
+          grep -vE '^[[:blank:]]*#' .github/workflows/ubuntu-ndctl-build-deps | \
+          xargs sudo apt install -y
 
-      # argbash. TODO: mixing generated code and sources in the same git
-      # repo is generally a bad idea but this particular one changes
-      # rarely, so it should probably deserve an exception avoiding
-      # everyone this step.
       - name: argbash
         run: |
           AB_VER=2.10.0
@@ -107,125 +141,253 @@ jobs:
           sudo apt install -y autoconf
           sudo make -C argbash-${AB_VER}/resources install PREFIX=/usr/local/
 
-      - name: download ndctl
-        uses: actions/checkout@v4
-        with:
-          repository: pmem/ndctl
-          ref: v83
-          path: ndctl
-
-      - name: download kernel
-        id: kernel_checkout
-        uses: actions/checkout@v4
-        with:
-          repository: torvalds/linux
-          ref: v6.19
-          path: kernel
-
-      - name: set week number for ccache
+      - name: set week number for caches
         id: weeks
         run: |
           printf 'now=%s\n' "$(date +%Y-w%U)" >> "$GITHUB_OUTPUT"
           printf 'previous=%s\n' "$(date +%Y-w%U -d '7 days ago')" >> "$GITHUB_OUTPUT"
 
-      # Warning: there are relatively complex rules that restrict caching
-      # across branches and pull requests.  These will cause apparent
-      # "duplicates" to appear in the "Caches" section in
-      # Actions->Management. Caching will always work inside a pull request.
-      # There is a daily run in scheduled.yml to seed the cache.
+      - name: compute cache key suffixes
+        id: cachekeys
+        shell: bash
+        run: |
+          set -euo pipefail
+          k="$(printf '%s\n' "$KERNEL_REPO@$KERNEL_BRANCH" | sha256sum | awk '{print $1}')"
+          n="$(printf '%s\n' "$NDCTL_REPO@$NDCTL_BRANCH" | sha256sum | awk '{print $1}')"
+          echo "kernel_key=$k" >> "$GITHUB_OUTPUT"
+          echo "ndctl_key=$n" >> "$GITHUB_OUTPUT"
+
       - name: Fetch ccache
         uses: actions/cache@v4
         with:
-          # 'CCACHE_DIR' in https://manpages.ubuntu.com/manpages/noble/man1/ccache.1.html
-          # Max GitHub storage for this is 10G. Dunno what happens if a
-          # _single_ cache entry/key is bigger than 10G? ccache max_size is
-          # 5G, so we're good. Typical kernel compilation seems to use ~1G?
           path: ~/.cache/ccache/
-
-          # The kernel takes MUCH longer than ndctl or anything else, so
-          # index the cache only based on the kernel version to keep
-          # things simple.  But: invalidate and refresh .ccache weekly
-          # to regularly adjust to any .config, toolchain, ndctl, .dpkg
-          # upgrade or any other escaping change.
-          key: ${{ matrix.cfg.os }}_${{ matrix.arch }}_${{ steps.kernel_checkout.outputs.ref }}_${{ steps.weeks.outputs.now }}
-          # Don't start new week from scratch
+          key: ccache_${{ env.RUNNER_OS_LABEL }}_${{ env.ARCH_LABEL }}_${{ steps.cachekeys.outputs.kernel_key }}_${{ steps.weeks.outputs.now }}
           restore-keys: |
-            ${{ matrix.cfg.os }}_${{ matrix.arch }}_${{ steps.kernel_checkout.outputs.ref }}_${{ steps.weeks.outputs.previous }}
-            ${{ matrix.cfg.os }}_${{ matrix.arch }}_${{ steps.kernel_checkout.outputs.ref }}
-            ${{ matrix.cfg.os }}_${{ matrix.arch }}
+            ccache_${{ env.RUNNER_OS_LABEL }}_${{ env.ARCH_LABEL }}_${{ steps.cachekeys.outputs.kernel_key }}_${{ steps.weeks.outputs.previous }}
+            ccache_${{ env.RUNNER_OS_LABEL }}_${{ env.ARCH_LABEL }}_${{ steps.cachekeys.outputs.kernel_key }}
+            ccache_${{ env.RUNNER_OS_LABEL }}_${{ env.ARCH_LABEL }}
 
-      - name: defconfig
-        working-directory: ${{ github.workspace }}/kernel
+      - name: ensure clean checkout dirs
+        shell: bash
         run: |
-          make defconfig ARCH=${{ matrix.arch }}
-          ./scripts/kconfig/merge_config.sh .config ../run_qemu/.github/workflows/cxl-test.cfg
+          set -euo pipefail
+          rm -rf ndctl kernel
+
+      # Checkout that supports either "owner/name" OR full git URL.
+      - name: checkout ndctl
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NDCTL_REPO" =~ ^https?://|^git://|^ssh://|^git@ ]]; then
+            git clone --depth 1 --branch "$NDCTL_BRANCH" "$NDCTL_REPO" ndctl
+          else
+            git clone --depth 1 --branch "$NDCTL_BRANCH" "https://github.com/${NDCTL_REPO}.git" ndctl
+          fi
+
+      - name: checkout kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GIT_LFS_SKIP_SMUDGE=1
+          if [[ "$KERNEL_REPO" =~ ^https?://|^git://|^ssh://|^git@ ]]; then
+            git -c submodule.recurse=false clone \
+              --depth 1 --single-branch \
+              --branch "$KERNEL_BRANCH" \
+              "$KERNEL_REPO" kernel
+          else
+            git -c submodule.recurse=false clone \
+              --depth 1 --single-branch \
+              --branch "$KERNEL_BRANCH" \
+              "https://github.com/${KERNEL_REPO}.git" kernel
+          fi
+
+      - name: plan selected test suite
+        id: suiteplan
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$TEST_SUITE" in
+            all)           run_opts='--all-test-run'                    ;;
+            nvdimm)        run_opts='--nvdimm-test-run'                 ;;
+            dax)           run_opts='--dax-test-run'                    ;;
+            cxl)           run_opts='--cxl-test-run'                    ;;
+            "nvdimm dax")  run_opts='--nvdimm-test-run --dax-test-run'  ;;
+            *)
+              echo "Unknown test_suite: $TEST_SUITE" >&2
+              exit 1
+              ;;
+          esac
+          printf 'run_opts=%s\n' "$run_opts" >> "$GITHUB_OUTPUT"
+
+      - name: show revisions under test
+        run: |
+          echo "Kernel repo:   $KERNEL_REPO"
+          echo "Kernel branch: $KERNEL_BRANCH"
+          git -C kernel rev-parse HEAD
+          git -C kernel log -1 --oneline
+          echo
+          echo "ndctl repo:    $NDCTL_REPO"
+          echo "ndctl branch:  $NDCTL_BRANCH"
+          git -C ndctl rev-parse HEAD
+          git -C ndctl log -1 --oneline
+          echo
+          echo "Runner:        $RUNNER_OS_LABEL"
+          echo "Arch:          $ARCH_LABEL"
+          echo "mkosi image:   $MKOSI_DISTRO $MKOSI_RELEASE"
+          echo "test suites:   $TEST_SUITE"
+          echo "kernel config: ci-base.cfg + cxl-test.cfg + nfit-test.cfg"
+          echo "run_qemu opts: ${{ steps.suiteplan.outputs.run_opts }}"
+          echo "timeout (min): $RUN_TIMEOUT_MIN"
+
+      - name: prepare kernel config
+        working-directory: ${{ github.workspace }}/kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          make defconfig ARCH=x86_64
+
+          # Always merge all suite configs so every run produces an identical
+          # kernel binary — this keeps ccache warm regardless of which test
+          # suite is selected.
+          cfgs=(
+            ../run_qemu/.github/workflows/ci-base.cfg
+            ../run_qemu/.github/workflows/cxl-test.cfg
+            ../run_qemu/.github/workflows/nfit-test.cfg
+          )
+
+          bash ./scripts/kconfig/merge_config.sh .config "${cfgs[@]}"
+          make olddefconfig ARCH=x86_64
 
       - name: disable AppArmor
         run: |
-          # Bubblewrap needs this for RTM_NEWADDR. This may not be required in
-          # this GitHub runner/container but it's still useful as "documentation"
-          # https://ubuntu.com/blog/ubuntu-23-10-restricted-unprivileged-user-namespaces
           if test -e /proc/sys/kernel/apparmor_restrict_unprivileged_unconfined; then
-                    sudo sysctl -w kernel.apparmor_restrict_unprivileged_unconfined=0
-                    sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_unconfined=0
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
           fi
 
-      # We could just let run_qemu.sh do this in the next step, but we want to
-      # know how long it takes.  Splitting logs also makes them much shorter
-      # and easier to scroll. Finally, finer-grained failures are better.
-      - name: build kernel
-        run: |
-          ccache --show-stats
-          cd kernel
-          PATH=/usr/lib/ccache:"$PATH" make -j $(nproc)
-
-      # Required for rq_autorun.
-      # It's not clear why mkosi v12 does not do this (v14 seems to work)
-      - name: manual "systemctl preset-all" on Ubuntu 22.04
-        if: matrix.cfg.os  == 'ubuntu-22.04'
-        run: |
-          mkdir -p kernel/qbuild
-          printf 'systemctl preset-all\n' >> kernel/qbuild/mkosi.postinst
-          chmod a+x kernel/qbuild/mkosi.postinst
-
-      - name: run_qemu.sh
+      - name: run_qemu_ci.sh
         run: |
           set -x
+
           mkosi --version
+          qemu-system-x86_64 --version || true
+          which qemu-system-x86_64 || true
+
           ccache --show-stats
           cp run_qemu/contrib/tmpfs_workspace.tmpl run_qemu/mkosi_tmpl_portable/
+
+          rm -f /tmp/rq_0.log
+          touch /tmp/rq_0.log
+          chmod a+rw /tmp/rq_0.log
+
           cd kernel
 
-          # --no-kvm is very slow but required to "stack" QEMUlation on top of a virtual GitHub runner
-          # At "home", use KVM and this instead: sudo usermod -a -G kvm $(id -u -n)
-          PATH=/usr/lib/ccache:"$PATH" \
-          distro=${{ matrix.cfg.img_distro }} rev=${{ matrix.cfg.img_rel }} \
-                 ndctl='${{ github.workspace }}'/ndctl \
-                 ../run_qemu/run_qemu.sh ${{ matrix.run_opts }} --no-kvm --timeout=35 --debug
+          (
+            PATH=/usr/lib/ccache:"$PATH" \
+            distro=${MKOSI_DISTRO} rev=${MKOSI_RELEASE} \
+            ndctl='${{ github.workspace }}/ndctl' \
+            ../run_qemu/run_qemu_ci.sh ${{ steps.suiteplan.outputs.run_opts }} \
+              --rebuild=kmod \
+              --no-kvm \
+              --timeout=${RUN_TIMEOUT_MIN} \
+              --debug
+          ) 2>&1 | tee -a /tmp/rq_0.log
 
-      - name: upload test logs
-        if: ${{ !cancelled() }}
+          exit ${PIPESTATUS[0]}
+
+      - name: failure triage snapshot
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set +e
+          echo "=== df -h ==="
+          df -h
+          echo
+          echo "=== free -h ==="
+          free -h
+          echo
+          echo "=== dmesg tail ==="
+          dmesg | tail -n 200 || true
+          echo
+          echo "=== last 200 lines of /tmp/rq_0.log ==="
+          tail -n 200 /tmp/rq_0.log 2>/dev/null || true
+
+      - name: check if qemu died early
+        if: ${{ always() }}
+        run: |
+          echo "=== qemu processes ==="
+          ps -ef | grep -v grep | grep qemu-system-x86_64 || echo "no qemu process"
+          echo "=== QMP socket ==="
+          ls -la /tmp/run_qemu_qmp_0 || true
+
+      - name: show bios and serial logs
+        if: ${{ always() }}
+        run: |
+          echo "=== /tmp/rq_0.log tail ==="
+          tail -n 200 /tmp/rq_0.log || true
+          echo "=== bios_debug.log ==="
+          tail -n 200 kernel/bios_debug.log 2>/dev/null || tail -n 200 bios_debug.log 2>/dev/null || true
+
+      - name: ndctl test run results
+        if: always()
+        run: |
+          echo "==== ndctl test run results ($TEST_SUITE) ===="
+          sed -e 's/^\[[^]]*\] //' -e 's/\r$//' /tmp/rq_0.log \
+            | awk '
+                /^======= meson-test\.log ========/{p=1; next}
+                /^======= (test failure logs|Done )/{p=0}
+                p {sub(/^[^:]+\.log: ?/, ""); print}
+              '
+
+      - name: check test failures
+        id: test_status
+        if: always()
+        run: |
+          if grep -qE '(Fail|Skipped):[[:blank:]]+[^0[:blank:]]' /tmp/rq_0.log 2>/dev/null; then
+            echo "has_failures=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_failures=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: upload logs
+        if: ${{ failure() || steps.test_status.outputs.has_failures == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: logs ${{ matrix.cfg.os }}
-          if-no-files-found: error
+          name: logs-${{ inputs.test_suite }}-${{ inputs.kernel_branch }}
+          if-no-files-found: warn
           path: |
             /tmp/rq_0.log
-          # This sample would work if we were "pre-"compiling outside the mkosi chroot first.
-          # ${{ github.workspace }}/ndctl/build/meson-logs/meson-log.txt
+            kernel/bios_debug.log
+            bios_debug.log
 
-
-      #  Test update_existing_rootfs(), default value for distro= and various other things
-      - name: incremental build
+      - name: job summary
+        if: always()
+        shell: bash
         run: |
-          set -x
-          cd kernel
-          ndctl='${{ github.workspace }}'/ndctl \
-          ../run_qemu/run_qemu.sh -v --no-run ${{ matrix.run_opts }}
+          {
+            echo "## ndctl Test Results — ${TEST_SUITE}"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Kernel** | \`${KERNEL_REPO} @ ${KERNEL_BRANCH}\` |"
+            echo "| **ndctl**  | \`${NDCTL_REPO} @ ${NDCTL_BRANCH}\` |"
+            echo ""
+            if [[ -f /tmp/rq_0.log ]]; then
+              echo '```'
+              sed -e 's/^\[[^]]*\] //' -e 's/\r$//' /tmp/rq_0.log \
+                | awk '
+                    /^======= meson-test\.log ========/{p=1; next}
+                    /^======= (test failure logs|Done )/{p=0}
+                    p {sub(/^[^:]+\.log: ?/, ""); print}
+                  '
+              echo '```'
+            else
+              echo "> Guest did not produce a test log."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: ccache stats post build
+      - name: ccache stats
         run: |
-          # Pre-build stats printed at the start of the build step
-          set -x
           ccache --show-stats
-          ccache --show-config | grep dir
+          ccache --show-config | grep dir || true
