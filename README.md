@@ -1,19 +1,28 @@
 # NDCTL Test Runner
 
-NDCTL Test Runner is a GitHub Actions workflow that allows Linux kernel
-developers to validate kernel changes using the ndctl test suites for
-CXL, NVDIMM, and DAX.
+NDCTL Test Runner is a GitHub Actions workflow that builds a Linux kernel,
+boots it in QEMU using run_qemu_ci.sh, and executes the ndctl test suites
+for CXL, NVDIMM, and DAX. It runs entirely on GitHub-hosted infrastructure
+with no special hardware required.
 
-The workflow builds a kernel, boots it in QEMU using run_qemu_ci.sh, and
-executes the selected ndctl test suites.
+This repository serves two purposes:
 
-The goal is to provide a simple automated testing environment that runs
-entirely on GitHub-hosted infrastructure. No special hardware is required.
+**Scheduled testing of upstream kernel branches** — five workflows run
+daily against the major CXL, NVDIMM, and linux-next kernel trees, each
+tested against ndctl/pending. See [Scheduled Runs](#scheduled-runs).
+
+**A reusable test runner for kernel developers** — fork this repository to
+run tests against your own kernel branches. Tests can be launched four ways:
+
+- From the **Actions tab** in your fork — [Quick Start](#quick-start)
+- From the **command line** using the GitHub CLI — [Running From The Command Line](#running-from-the-command-line)
+- Using the included **run-test.sh** wrapper — [Using run-test.sh](#using-run-testsh)
+- **Automatically on push**, triggered from your kernel repository — [Automatically Trigger Tests](#automatically-trigger-tests-from-your-kernel-repository)
 
 
 ## Scheduled Runs
 
-Five workflows run automatically each day at 06:00 UTC (10:00 PM PST),
+Five workflows run automatically each day at 06:00 UTC,
 one per branch under test:
 
 - `cxl/next` — cxl/cxl.git, cxl tests
@@ -27,14 +36,9 @@ TODO: Add a weekly workflow to test new Linus release candidate tags (mainline).
 Each workflow appears as a separate entry in the **Actions** tab. Scheduled
 runs are labeled `(schedule)` in the run list.
 
-The `cxl` and `libnvdimm` workflows use SHA deduplication: if a branch has
-not changed since the last successful run, the test is skipped and no runner
-time is consumed. The `linux-next/master` workflow always runs since
-linux-next changes daily.
-
-The `linux-next/master` workflow runs the full `all` suite (CXL, NVDIMM, and
-DAX) and uses a 45-minute guest timeout. The other four workflows use a
-35-minute timeout.
+All five workflows use SHA deduplication: if neither the kernel branch nor
+ndctl/pending has changed since the last successful run, the test is skipped
+and no runner time is consumed.
 
 Each workflow can also be triggered manually at any time from the Actions tab
 using the **Run workflow** button.
