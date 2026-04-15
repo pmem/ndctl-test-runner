@@ -1,0 +1,231 @@
+---
+# Tools that can save round-trips to github and a lot of time:
+#
+# yamllint -f parsable pull_request.yml
+# pip3 install ruamel.yaml.cmd
+# yaml merge-expand pull_request.yml exp.yml &&
+#    diff -w -u pull_request.yml exp.yml
+#
+# github.com also has a powerful web editor that can be used without
+# committing.
+
+
+name: main test
+
+# 'workflow_dispatch' allows running this workflow manually from the
+# 'Actions' tab
+# yamllint disable-line rule:truthy
+on: [pull_request, workflow_dispatch, workflow_call]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.cfg.os }}
+
+    strategy:
+      fail-fast: false
+      # matrix is very flexible and not always "obvious"
+      # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflo
+      matrix:
+        # Keep it simple and just build "ourselves"
+        cfg:
+          - os: ubuntu-22.04
+            img_distro: ubuntu
+            img_rel: jammy
+          - os: ubuntu-24.04
+            img_distro: ubuntu
+            img_rel: noble
+        arch: [x86_64]
+        run_opts: [--cxl-test-run --ndctl-build]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: run_qemu
+
+      # inspired by https://github.com/jlumbroso/free-disk-space/blob/main/action.yml
+      - name: apt-get remove for disk space
+        run: |
+          df -h
+          sudo apt-get remove -y '^aspnetcore-.*' '^dotnet-.*'
+          sudo apt-get remove -y 'php.*' '^mongodb-.*' '^mysql-.*'
+          sudo apt-get remove -y azure-cli '^google-cloud*'
+          sudo apt-get remove -y '^llvm-.*'
+          sudo apt-get autoremove -y
+          sudo apt-get install -y bc
+          df -h
+
+      - name: rm -rf for disk space
+        run: |
+          df -h
+          sudo docker image prune --all --force || true
+          df -h
+          _dirs=( /usr/local/lib/android /usr/share/dotnet /usr/local/.ghcup )
+          sudo du -shc "${_dirs[@]}" || true
+          sudo rm -rf "${_dirs[@]}"
+          df -h
+
+      - name: apt install mkosi and run_qemu requirements
+        run: |
+          # update is required first, see
+          # https://github.com/actions/runner-images/issues/2924
+          sudo apt-get update
+
+          # Kernel deps
+          sudo apt install -y build-essential flex bison libelf-dev libssl-dev ccache
+
+          # run_qemu deps
+          sudo apt install -y mkosi # this one pulls A LOT
+          sudo apt install -y dracut-core qemu-utils ovmf mtools qemu-system-x86
+          pip3 install qemu.qmp
+
+      - name: mkosi v20 fixes on Ubuntu 24.04
+        if: matrix.cfg.os  == 'ubuntu-24.04'
+        run: |
+          cd /usr/lib/python3/dist-packages
+          sudo git apply "${{ github.workspace }}"/run_qemu/Patches/ubuntu/24.04/mkosi/*.patch
+
+      - name: apt install Ubuntu 24.04 requirements for mkosi
+        if: matrix.cfg.os  == 'ubuntu-24.04'
+        run: |
+           # systemd was monolithic in Ubunutu 22
+           sudo apt install -y systemd-ukify systemd-boot
+
+      - name: apt install ndctl build dependencies
+        run: |
+           grep -vE '^[[:blank:]]*#' .github/workflows/ubuntu-ndctl-build-deps |
+                    xargs sudo apt install -y
+
+      # argbash. TODO: mixing generated code and sources in the same git
+      # repo is generally a bad idea but this particular one changes
+      # rarely, so it should probably deserve an exception avoiding
+      # everyone this step.
+      - name: argbash
+        run: |
+          AB_VER=2.10.0
+          wget https://github.com/matejak/argbash/archive/refs/tags/${AB_VER}.tar.gz
+          tar xf ${AB_VER}.tar.gz
+          sudo apt install -y autoconf
+          sudo make -C argbash-${AB_VER}/resources install PREFIX=/usr/local/
+
+      - name: download ndctl
+        uses: actions/checkout@v4
+        with:
+          repository: pmem/ndctl
+          ref: v83
+          path: ndctl
+
+      - name: download kernel
+        id: kernel_checkout
+        uses: actions/checkout@v4
+        with:
+          repository: torvalds/linux
+          ref: v6.19
+          path: kernel
+
+      - name: set week number for ccache
+        id: weeks
+        run: |
+          printf 'now=%s\n' "$(date +%Y-w%U)" >> "$GITHUB_OUTPUT"
+          printf 'previous=%s\n' "$(date +%Y-w%U -d '7 days ago')" >> "$GITHUB_OUTPUT"
+
+      # Warning: there are relatively complex rules that restrict caching
+      # across branches and pull requests.  These will cause apparent
+      # "duplicates" to appear in the "Caches" section in
+      # Actions->Management. Caching will always work inside a pull request.
+      # There is a daily run in scheduled.yml to seed the cache.
+      - name: Fetch ccache
+        uses: actions/cache@v4
+        with:
+          # 'CCACHE_DIR' in https://manpages.ubuntu.com/manpages/noble/man1/ccache.1.html
+          # Max GitHub storage for this is 10G. Dunno what happens if a
+          # _single_ cache entry/key is bigger than 10G? ccache max_size is
+          # 5G, so we're good. Typical kernel compilation seems to use ~1G?
+          path: ~/.cache/ccache/
+
+          # The kernel takes MUCH longer than ndctl or anything else, so
+          # index the cache only based on the kernel version to keep
+          # things simple.  But: invalidate and refresh .ccache weekly
+          # to regularly adjust to any .config, toolchain, ndctl, .dpkg
+          # upgrade or any other escaping change.
+          key: ${{ matrix.cfg.os }}_${{ matrix.arch }}_${{ steps.kernel_checkout.outputs.ref }}_${{ steps.weeks.outputs.now }}
+          # Don't start new week from scratch
+          restore-keys: |
+            ${{ matrix.cfg.os }}_${{ matrix.arch }}_${{ steps.kernel_checkout.outputs.ref }}_${{ steps.weeks.outputs.previous }}
+            ${{ matrix.cfg.os }}_${{ matrix.arch }}_${{ steps.kernel_checkout.outputs.ref }}
+            ${{ matrix.cfg.os }}_${{ matrix.arch }}
+
+      - name: defconfig
+        working-directory: ${{ github.workspace }}/kernel
+        run: |
+          make defconfig ARCH=${{ matrix.arch }}
+          ./scripts/kconfig/merge_config.sh .config ../run_qemu/.github/workflows/cxl-test.cfg
+
+      - name: disable AppArmor
+        run: |
+          # Bubblewrap needs this for RTM_NEWADDR. This may not be required in
+          # this GitHub runner/container but it's still useful as "documentation"
+          # https://ubuntu.com/blog/ubuntu-23-10-restricted-unprivileged-user-namespaces
+          if test -e /proc/sys/kernel/apparmor_restrict_unprivileged_unconfined; then
+                    sudo sysctl -w kernel.apparmor_restrict_unprivileged_unconfined=0
+                    sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+
+      # We could just let run_qemu.sh do this in the next step, but we want to
+      # know how long it takes.  Splitting logs also makes them much shorter
+      # and easier to scroll. Finally, finer-grained failures are better.
+      - name: build kernel
+        run: |
+          ccache --show-stats
+          cd kernel
+          PATH=/usr/lib/ccache:"$PATH" make -j $(nproc)
+
+      # Required for rq_autorun.
+      # It's not clear why mkosi v12 does not do this (v14 seems to work)
+      - name: manual "systemctl preset-all" on Ubuntu 22.04
+        if: matrix.cfg.os  == 'ubuntu-22.04'
+        run: |
+          mkdir -p kernel/qbuild
+          printf 'systemctl preset-all\n' >> kernel/qbuild/mkosi.postinst
+          chmod a+x kernel/qbuild/mkosi.postinst
+
+      - name: run_qemu.sh
+        run: |
+          set -x
+          mkosi --version
+          ccache --show-stats
+          cp run_qemu/contrib/tmpfs_workspace.tmpl run_qemu/mkosi_tmpl_portable/
+          cd kernel
+
+          # --no-kvm is very slow but required to "stack" QEMUlation on top of a virtual GitHub runner
+          # At "home", use KVM and this instead: sudo usermod -a -G kvm $(id -u -n)
+          PATH=/usr/lib/ccache:"$PATH" \
+          distro=${{ matrix.cfg.img_distro }} rev=${{ matrix.cfg.img_rel }} \
+                 ndctl='${{ github.workspace }}'/ndctl \
+                 ../run_qemu/run_qemu.sh ${{ matrix.run_opts }} --no-kvm --timeout=35 --debug
+
+      - name: upload test logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs ${{ matrix.cfg.os }}
+          if-no-files-found: error
+          path: |
+            /tmp/rq_0.log
+          # This sample would work if we were "pre-"compiling outside the mkosi chroot first.
+          # ${{ github.workspace }}/ndctl/build/meson-logs/meson-log.txt
+
+
+      #  Test update_existing_rootfs(), default value for distro= and various other things
+      - name: incremental build
+        run: |
+          set -x
+          cd kernel
+          ndctl='${{ github.workspace }}'/ndctl \
+          ../run_qemu/run_qemu.sh -v --no-run ${{ matrix.run_opts }}
+
+      - name: ccache stats post build
+        run: |
+          # Pre-build stats printed at the start of the build step
+          set -x
+          ccache --show-stats
+          ccache --show-config | grep dir
