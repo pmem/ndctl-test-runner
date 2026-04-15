@@ -68,7 +68,7 @@ jobs:
 
     steps:
       - name: checkout run_qemu (this repo)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: run_qemu
 
@@ -159,7 +159,7 @@ jobs:
           echo "ndctl_key=$n" >> "$GITHUB_OUTPUT"
 
       - name: Fetch ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ccache/
           key: ccache_${{ env.RUNNER_OS_LABEL }}_${{ env.ARCH_LABEL }}_${{ steps.cachekeys.outputs.kernel_key }}_${{ steps.weeks.outputs.now }}
