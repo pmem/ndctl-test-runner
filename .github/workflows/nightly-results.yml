@@ -36,7 +36,13 @@ jobs:
 
             [[ "$run_date" != "$TODAY" ]] && { echo "—";      return; }
             [[ "$conclusion" == "pending" ]] && { echo "running"; return; }
-            [[ "$conclusion" == "failure" ]] && { echo "FAIL";    return; }
+
+            local run_url="https://github.com/$REPO/actions/runs/$run_id"
+
+            if [[ "$conclusion" == "failure" ]]; then
+              echo "[fail]($run_url)"
+              return
+            fi
 
             test_conclusion=$(gh api "repos/$REPO/actions/runs/$run_id/jobs" \
               --jq '[.jobs[] | select(.name == "test")][0].conclusion // "skipped"')
@@ -44,7 +50,7 @@ jobs:
             if [[ "$test_conclusion" == '"skipped"' ]]; then
               echo "skip"
             else
-              echo "pass"
+              echo "[pass]($run_url)"
             fi
           }
 
@@ -59,6 +65,8 @@ jobs:
           if [[ ! -f results.md ]]; then
             {
               echo '# NDCTL Test Runner — Nightly Results'
+              echo ''
+              echo '**Legend:** `pass` = unit tests passed • `fail` = unit tests failed OR build failed OR workflow failed • `skip` = branch unchanged since last successful run • `—` = not run today'
               echo ''
               echo '| Date | cxl/next | cxl/fixes | nvdimm/for-next | nvdimm/fixes | linux-next |'
               echo '|------|:--------:|:---------:|:---------------:|:------------:|:----------:|'
