@@ -4,7 +4,7 @@ name: linux-next/master
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: '0 6 * * *'  # 10 pm PST (UTC-8)
+    - cron: '0 1 * * *'  # 6 pm PDT (UTC-7) / 5 pm PST (UTC-8)
   workflow_dispatch:
 
 run-name: "linux-next/master (${{ github.event_name }})"
