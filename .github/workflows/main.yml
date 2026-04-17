@@ -72,6 +72,11 @@ jobs:
         with:
           path: run_qemu
 
+      # Prefer IPv4 over IPv6 to avoid network unreachable errors
+      - name: configure apt for IPv4
+        run: |
+          echo 'Acquire::ForceIPv4 "true";' | sudo tee /etc/apt/apt.conf.d/99force-ipv4
+
       # Freeing disk space takes time. Check if needed.
       - name: check free disk space
         id: disk
