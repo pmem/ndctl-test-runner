@@ -16,5 +16,13 @@ Automated daily testing of upstream kernel branches against ndctl/pending:
 
 | Date | cxl/next | cxl/fixes | nvdimm/for-next | nvdimm/fixes | linux-next |
 |------|:--------:|:---------:|:---------------:|:------------:|:----------:|
-| 2026-04-16 | pass | FAIL | pass | pass | pass |
+| 2026-04-16 | pass | fail | pass | pass | pass |
 | 2026-04-15 | — | — | — | — | — |
+
+---
+
+## Notes
+
+**2026-04-16** - cxl/fixes failed due to apt network timeout, not a real failure. Re-ran manually and passed.
+
+**2026-04-15** - Moving day, tests not run.
