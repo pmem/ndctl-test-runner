@@ -22,7 +22,7 @@ run tests against your own kernel branches. Tests can be launched four ways:
 
 ## Scheduled Runs
 
-Five workflows run automatically each day at 06:00 UTC,
+Five workflows run automatically each day at 01:00 UTC (6pm PDT / 5pm PST),
 one per branch under test:
 
 - `cxl/next` — cxl/cxl.git, cxl tests
@@ -30,6 +30,8 @@ one per branch under test:
 - `libnvdimm/for-next` — nvdimm/nvdimm.git, nvdimm and dax tests
 - `libnvdimm/fixes` — nvdimm/nvdimm.git, nvdimm and dax tests
 - `linux-next/master` — next/linux-next.git, cxl, nvdimm, and dax tests
+
+**View nightly results:** https://pmem.github.io/ndctl-test-runner/
 
 TODO: Add a weekly workflow to test new Linus release candidate tags (mainline).
 
