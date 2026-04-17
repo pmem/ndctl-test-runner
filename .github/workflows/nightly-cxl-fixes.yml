@@ -4,7 +4,7 @@ name: cxl/fixes
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: '0 1 * * *'  # 6 pm PDT (UTC-7) / 5 pm PST (UTC-8)
+    - cron: '0 4 * * *'  # 9 pm PDT (UTC-7) / 8 pm PST (UTC-8)
   workflow_dispatch:
 
 run-name: "cxl/fixes (${{ github.event_name }})"
