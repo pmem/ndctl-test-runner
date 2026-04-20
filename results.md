@@ -16,10 +16,10 @@ Automated daily testing of upstream kernel branches against ndctl/pending:
 
 | Date | cxl/next | cxl/fixes | nvdimm/for-next | nvdimm/fixes | linux-next |
 |------|:--------:|:---------:|:---------------:|:------------:|:----------:|
-| 2026-04-20 | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24651211976) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24651348885) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24651550517) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24651415667) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24651451029) |
-| 2026-04-19 | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24622247773) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24622309061) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24622376341) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24622333158) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24622341801) |
+| 2026-04-20 | skip | skip | skip | skip | skip |
+| 2026-04-19 | skip | skip | skip | skip | skip |
 | 2026-04-18 | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24597877527) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24598073311) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24598121074) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24598096412) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24598099329) |
-| 2026-04-16 | pass | fail | pass | pass | pass |
+| 2026-04-16 | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24497568304) | [fail](https://github.com/pmem/ndctl-test-runner/actions/runs/24527494181) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24497288926) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24498382832) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24498495818) |
 | 2026-04-15 | — | — | — | — | — |
 
 ---
