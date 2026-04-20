@@ -1,4 +1,4 @@
-# NDCTL Test Runner — Nightly Results
+# Daily Run Results
 
 Tests are run against the ndctl pending branch.
 
