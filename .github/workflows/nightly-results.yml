@@ -70,7 +70,7 @@ jobs:
 
           if [[ ! -f results.md ]]; then
             {
-              echo '# NDCTL Test Runner — Nightly Results'
+              echo '# Daily Run Results'
               echo ''
               echo 'Tests are run against the ndctl pending branch.'
               echo ''
