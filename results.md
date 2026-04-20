@@ -1,17 +1,19 @@
 # NDCTL Test Runner — Nightly Results
 
-Automated daily testing of upstream kernel branches against ndctl/pending:
+Tests are run against the ndctl pending branch.
 
-- **cxl/next** — https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git (cxl tests)
-- **cxl/fixes** — https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git (cxl tests)
-- **nvdimm/for-next** — https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git (nvdimm + dax tests)
-- **nvdimm/fixes** — https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git (nvdimm + dax tests)
-- **linux-next** — https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git (cxl + nvdimm + dax tests)
+- **cxl/next**: https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git (cxl tests)
+- **cxl/fixes**: https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git (cxl tests)
+- **nvdimm/for-next**: https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git (nvdimm + dax tests)
+- **nvdimm/fixes**: https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git (nvdimm + dax tests)
+- **linux-next**: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git (cxl + nvdimm + dax tests)
+
+Click through on the pass/fail results to lookup the kernel and ndctl SHA under test.
 
 **Legend:**
 - `pass` = unit tests passed
 - `fail` = unit tests failed OR build failed OR workflow failed
-- `skip` = branch unchanged since last successful run
+- `skip` = both kernel and ndctl branches were unchanged since last successful run
 - `—` = not run today
 
 | Date | cxl/next | cxl/fixes | nvdimm/for-next | nvdimm/fixes | linux-next |
