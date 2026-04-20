@@ -22,8 +22,7 @@ run tests against your own kernel branches. Tests can be launched four ways:
 
 ## Scheduled Runs
 
-Five workflows run automatically each day at 01:00 UTC (6pm PDT / 5pm PST),
-one per branch under test:
+Five workflows run automatically each day, one per branch under test:
 
 - `cxl/next` — cxl/cxl.git, cxl tests
 - `cxl/fixes` — cxl/cxl.git, cxl tests

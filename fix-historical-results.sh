@@ -29,15 +29,18 @@ status_of() {
     return
   fi
 
-  # Check if test job was skipped
+  # Check test job conclusion - job name can be "test" or "test / build"
   local test_conclusion
   test_conclusion=$(gh api "repos/$REPO/actions/runs/$run_id/jobs" \
-    --jq '[.jobs[] | select(.name == "test")][0].conclusion // "skipped"')
+    --jq '[.jobs[] | select(.name | startswith("test"))][0].conclusion // "none"')
 
-  if [[ "$test_conclusion" == "skipped" ]] || [[ "$test_conclusion" == "null" ]]; then
+  if [[ "$test_conclusion" == "success" ]]; then
+    echo "[pass]($run_url)"
+  elif [[ "$test_conclusion" == "skipped" ]]; then
     echo "skip"
   else
-    echo "[pass]($run_url)"
+    # No test job found - shouldn't happen but treat as skip
+    echo "skip"
   fi
 }
 
