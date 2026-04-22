@@ -12,6 +12,7 @@ Click through on the pass/fail results to lookup the kernel and ndctl SHA under 
 
 | Date | cxl/next | cxl/fixes | nvdimm/for-next | nvdimm/fixes | linux-next |
 |------|:--------:|:---------:|:---------------:|:------------:|:----------:|
+| 2026-04-22 | skip | skip | skip | skip | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24759704519) |
 | 2026-04-21 | skip | skip | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24703524511) | skip | skip |
 | 2026-04-21 | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24700726311) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24700728870) | [fail](https://github.com/pmem/ndctl-test-runner/actions/runs/24700730266) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24700731725) | [pass](https://github.com/pmem/ndctl-test-runner/actions/runs/24700733076) |
 | 2026-04-20 | skip | skip | skip | skip | skip |
