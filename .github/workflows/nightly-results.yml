@@ -42,7 +42,7 @@ jobs:
             local run_url="https://github.com/$REPO/actions/runs/$run_id"
 
             if [[ "$conclusion" == "failure" ]]; then
-              echo "[fail]($run_url)"
+              echo "[**<span style=\"color:red\">fail</span>**]($run_url)"
               return
             fi
 
@@ -51,7 +51,22 @@ jobs:
               --jq '[.jobs[] | select(.name | startswith("test"))][0].conclusion // "none"')
 
             if [[ "$test_conclusion" == "success" ]]; then
-              echo "[pass]($run_url)"
+              # Download artifacts and count skipped tests
+              local skip_count=0
+              local artifact_name="${wf%.yml}"
+              artifact_name="logs-${artifact_name#nightly-}"
+
+              if gh run download "$run_id" -n "$artifact_name" -D "/tmp/artifact-$run_id" 2>/dev/null; then
+                skip_count=$(grep -E "Skipped:[ \t]+[0-9]+" "/tmp/artifact-$run_id/tmp/rq_0.log" 2>/dev/null \
+                  | awk '{print $NF}' | head -1)
+                rm -rf "/tmp/artifact-$run_id"
+              fi
+
+              if [[ -n "$skip_count" ]] && [[ "$skip_count" -gt 0 ]]; then
+                echo "[pass [$skip_count]]($run_url)"
+              else
+                echo "[pass]($run_url)"
+              fi
             elif [[ "$test_conclusion" == "skipped" ]]; then
               echo "skip"
             else
@@ -72,13 +87,13 @@ jobs:
             {
               echo '# Daily Run Results'
               echo ''
-              echo 'Tests are run against the ndctl pending branch.'
+              echo 'Tests are run against the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending).'
               echo ''
-              echo '- **cxl/next**: https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git (cxl tests)'
-              echo '- **cxl/fixes**: https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git (cxl tests)'
-              echo '- **nvdimm/for-next**: https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git (nvdimm + dax tests)'
-              echo '- **nvdimm/fixes**: https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git (nvdimm + dax tests)'
-              echo '- **linux-next**: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git (cxl + nvdimm + dax tests)'
+              echo '- **[cxl/next](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=next)**:		CXL unit tests'
+              echo '- **[cxl/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=fixes)**:		CXL unit tests'
+              echo '- **[nvdimm/for-next](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=for-next)**:	NVDIMM, DAX unit tests'
+              echo '- **[nvdimm/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=fixes)**:		NVDIMM, DAX unit tests'
+              echo '- **[linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/log/?h=master)**:		CXL, NVDIMM, DAX unit tests (all)'
               echo ''
               echo 'Click through on the pass/fail results to lookup the kernel and ndctl SHA under test.'
               echo ''
@@ -108,7 +123,7 @@ jobs:
               legend = [
                   '\n',
                   '**Legend:**\n',
-                  '- `pass` = unit tests passed\n',
+                  '- `pass` = unit tests passed (pass [N] means N tests were skipped)\n',
                   '- `fail` = unit tests failed OR build failed OR workflow failed\n',
                   '- `skip` = both kernel and ndctl branches were unchanged since last successful run\n',
                   '- `—` = not run today\n'
