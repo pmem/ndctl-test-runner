@@ -212,14 +212,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          case "$TEST_SUITE" in
+          # Strip leading/trailing whitespace from TEST_SUITE
+          suite="$(echo "$TEST_SUITE" | xargs)"
+          case "$suite" in
             all)           run_opts='--all-test-run'                    ;;
             nvdimm)        run_opts='--nvdimm-test-run'                 ;;
             dax)           run_opts='--dax-test-run'                    ;;
             cxl)           run_opts='--cxl-test-run'                    ;;
             "nvdimm dax")  run_opts='--nvdimm-test-run --dax-test-run'  ;;
             *)
-              echo "Unknown test_suite: $TEST_SUITE" >&2
+              echo "Unknown test_suite: $suite" >&2
               exit 1
               ;;
           esac
