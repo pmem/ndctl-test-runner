@@ -42,7 +42,7 @@ jobs:
             local run_url="https://github.com/$REPO/actions/runs/$run_id"
 
             if [[ "$conclusion" == "failure" ]]; then
-              echo "[**<span style=\"color:red\">fail</span>**]($run_url)"
+              echo "[<span style=\"color:red\">fail</span>]($run_url)"
               return
             fi
 
@@ -63,15 +63,15 @@ jobs:
               fi
 
               if [[ -n "$skip_count" ]] && [[ "$skip_count" -gt 0 ]]; then
-                echo "[pass [$skip_count]]($run_url)"
+                echo "[<span style=\"color:green\">pass</span>]($run_url) [$skip_count]"
               else
-                echo "[pass]($run_url)"
+                echo "[<span style=\"color:green\">pass</span>]($run_url)"
               fi
             elif [[ "$test_conclusion" == "skipped" ]]; then
-              echo "skip"
+              echo "—"
             else
               # No test job found - shouldn't happen but treat as skip
-              echo "skip"
+              echo "—"
             fi
           }
 
@@ -125,8 +125,7 @@ jobs:
                   '**Legend:**\n',
                   '- `pass` = unit tests passed (pass [N] means N tests were skipped)\n',
                   '- `fail` = unit tests failed OR build failed OR workflow failed\n',
-                  '- `skip` = both kernel and ndctl branches were unchanged since last successful run\n',
-                  '- `—` = not run today\n'
+                  '- `—` = testing skipped, both kernel and ndctl branches were unchanged since last successful run\n'
               ]
               # Find last table row and insert legend after
               for i in range(len(lines) - 1, -1, -1):
