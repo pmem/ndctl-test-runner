@@ -6,6 +6,7 @@ Tests are run against Linus mainline release tags from [torvalds/linux](https://
 
 | Kernel Tag | Date Tagged | Date Tested | Result | Attempts | Notes |
 |------------|-------------|-------------|--------|----------|-------|
+| v7.0 | 2026-04-12 | 2026-04-28 19:40 ET | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082119712) | 1 |  |
 
 ## Daily Run Results
 
