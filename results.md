@@ -6,7 +6,6 @@ Tests are run against Linus mainline release tags from [torvalds/linux](https://
 
 | Kernel tag | Tag date | Tested at | Result | Attempts | Notes |
 |------------|----------|-----------|--------|----------|-------|
-|------------|----------|-----------|--------|----------|-------|
 
 ## Daily Run Results
 
