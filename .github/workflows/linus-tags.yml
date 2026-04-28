@@ -1,0 +1,283 @@
+---
+name: linus mainline tags
+
+# yamllint disable-line rule:truthy
+on:
+  schedule:
+    - cron: '17 10 * * 1'  # Monday 6:17 AM ET (UTC-4 EDT / UTC-5 EST) - backstop
+  workflow_dispatch:
+    inputs:
+      kernel_tag:
+        description: "Optional: specific Linus tag to test (e.g., v7.1-rc1). If not provided, auto-detects latest."
+        required: false
+        type: string
+
+run-name: "linus-tags (${{ github.event_name }}${{ inputs.kernel_tag && format(' - {0}', inputs.kernel_tag) || '' }})"
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      target_tag: ${{ steps.determine.outputs.target_tag }}
+      tag_date: ${{ steps.determine.outputs.tag_date }}
+      should_test: ${{ steps.check.outputs.should_test }}
+    steps:
+      - name: checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: determine target tag
+        id: determine
+        run: |
+          set -euo pipefail
+
+          LINUS_REPO="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git"
+
+          if [[ -n "${{ inputs.kernel_tag }}" ]]; then
+            # Use explicit tag from manual trigger
+            TARGET_TAG="${{ inputs.kernel_tag }}"
+            echo "Using explicit tag: $TARGET_TAG"
+          else
+            # Auto-detect latest tag matching v[0-9]*
+            echo "Fetching tags from $LINUS_REPO"
+            git clone --bare --filter=blob:none "$LINUS_REPO" /tmp/linus-repo
+
+            # Get latest tag matching v[0-9]*
+            TARGET_TAG=$(git -C /tmp/linus-repo tag -l 'v[0-9]*' \
+              | sort -V \
+              | tail -1)
+
+            if [[ -z "$TARGET_TAG" ]]; then
+              echo "Error: no tags found matching v[0-9]*"
+              exit 1
+            fi
+
+            echo "Auto-detected latest tag: $TARGET_TAG"
+          fi
+
+          # Get tag date
+          git clone --bare --filter=blob:none "$LINUS_REPO" /tmp/linus-repo-date 2>/dev/null || true
+          TAG_DATE=$(git -C /tmp/linus-repo-date for-each-ref "refs/tags/$TARGET_TAG" \
+            --format='%(creatordate:short)')
+
+          if [[ -z "$TAG_DATE" ]]; then
+            echo "Warning: could not determine tag date for $TARGET_TAG, using current date"
+            TAG_DATE=$(date -u +%Y-%m-%d)
+          fi
+
+          echo "target_tag=$TARGET_TAG" >> "$GITHUB_OUTPUT"
+          echo "tag_date=$TAG_DATE" >> "$GITHUB_OUTPUT"
+          echo "Tag: $TARGET_TAG (created $TAG_DATE)"
+
+      - name: check if already tested
+        id: check
+        run: |
+          set -euo pipefail
+
+          TARGET_TAG="${{ steps.determine.outputs.target_tag }}"
+
+          if [[ ! -f results.md ]]; then
+            echo "should_test=true" >> "$GITHUB_OUTPUT"
+            echo "results.md not found - will test"
+            exit 0
+          fi
+
+          # Search for tag in the Linus Mainline Release Tags table
+          if grep -q "^| $TARGET_TAG |" results.md; then
+            echo "should_test=false" >> "$GITHUB_OUTPUT"
+            echo "Tag $TARGET_TAG already tested - skipping"
+          else
+            echo "should_test=true" >> "$GITHUB_OUTPUT"
+            echo "Tag $TARGET_TAG not yet tested - will test"
+          fi
+
+  test:
+    needs: detect
+    if: needs.detect.outputs.should_test == 'true'
+    uses: ./.github/workflows/main.yml
+    with:
+      kernel_repo: "https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git"
+      kernel_branch: "${{ needs.detect.outputs.target_tag }}"
+      ndctl_repo: "pmem/ndctl"
+      ndctl_branch: "pending"
+      test_suite: "all"
+      timeout_min: "45"
+
+  publish:
+    needs: [detect, test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: update results
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          REPO="${{ github.repository }}"
+          TARGET_TAG="${{ needs.detect.outputs.target_tag }}"
+          TAG_DATE="${{ needs.detect.outputs.tag_date }}"
+          RUN_ID="${{ github.run_id }}"
+          RUN_URL="https://github.com/$REPO/actions/runs/$RUN_ID"
+
+          # Format tested_at timestamp in ET timezone
+          TESTED_AT=$(TZ=America/New_York date '+%Y-%m-%d %H:%M ET')
+
+          # Determine result
+          TEST_CONCLUSION="${{ needs.test.result }}"
+          if [[ "$TEST_CONCLUSION" == "success" ]]; then
+            RESULT="[<span style=\"color:green\">pass</span>]($RUN_URL)"
+          else
+            RESULT="[<span style=\"color:red\">fail</span>]($RUN_URL)"
+          fi
+
+          # Check if row already exists (this is a rerun)
+          if grep -q "^| $TARGET_TAG |" results.md; then
+            echo "Updating existing row for $TARGET_TAG (rerun)"
+
+            # Extract current attempts count and notes
+            CURRENT_LINE=$(grep "^| $TARGET_TAG |" results.md)
+            CURRENT_ATTEMPTS=$(echo "$CURRENT_LINE" | awk -F'|' '{print $6}' | xargs)
+            CURRENT_NOTES=$(echo "$CURRENT_LINE" | awk -F'|' '{print $7}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            CURRENT_RESULT=$(echo "$CURRENT_LINE" | awk -F'|' '{print $5}' | xargs)
+
+            # Increment attempts
+            NEW_ATTEMPTS=$((CURRENT_ATTEMPTS + 1))
+
+            # Update notes based on previous result
+            if [[ "$CURRENT_NOTES" == "" ]]; then
+              # First rerun - add note about initial result
+              if [[ "$CURRENT_RESULT" == *"fail"* ]]; then
+                NEW_NOTES="initial [$CURRENT_RESULT]"
+              else
+                NEW_NOTES=""
+              fi
+            else
+              # Preserve existing notes
+              NEW_NOTES="$CURRENT_NOTES"
+            fi
+
+            # Add current result to notes if failed
+            if [[ "$TEST_CONCLUSION" == "success" ]]; then
+              if [[ -n "$NEW_NOTES" ]]; then
+                NEW_NOTES="$NEW_NOTES, rerun passed"
+              fi
+            else
+              if [[ -n "$NEW_NOTES" ]]; then
+                NEW_NOTES="$NEW_NOTES, rerun failed"
+              else
+                NEW_NOTES="rerun failed"
+              fi
+            fi
+
+            # Build new row
+            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT | $NEW_ATTEMPTS | $NEW_NOTES |"
+
+            # Replace the row using Python
+            python3 - "$TARGET_TAG" "$NEW_ROW" << 'PYEOF'
+          import sys
+          import re
+
+          target_tag = sys.argv[1]
+          new_row = sys.argv[2]
+
+          with open('results.md', 'r') as f:
+              content = f.read()
+
+          # Replace the row for this tag
+          pattern = rf'^\| {re.escape(target_tag)} \|.*$'
+          content = re.sub(pattern, new_row, content, flags=re.MULTILINE)
+
+          with open('results.md', 'w') as f:
+              f.write(content)
+          PYEOF
+          else
+            echo "Adding new row for $TARGET_TAG (first test)"
+
+            # First test of this tag
+            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT | 1 |  |"
+
+            # Insert new row in the Linus Mainline Release Tags section
+            python3 - "$NEW_ROW" "$TARGET_TAG" << 'PYEOF'
+          import sys
+          import re
+
+          new_row = sys.argv[1]
+          new_tag = sys.argv[2]
+
+          with open('results.md', 'r') as f:
+              lines = f.readlines()
+
+          # Find the Linus Mainline Release Tags table
+          linus_header_idx = None
+          linus_separator_idx = None
+
+          for i, line in enumerate(lines):
+              if 'Linus Mainline Release Tags' in line or 'Mainline Release Tags' in line:
+                  linus_header_idx = i
+              if linus_header_idx is not None and line.startswith('|---'):
+                  linus_separator_idx = i
+                  break
+
+          if linus_separator_idx is None:
+              print("Error: could not find Linus Mainline Release Tags table separator", file=sys.stderr)
+              sys.exit(1)
+
+          # Find insertion point - maintain version sort order (newest first)
+          insert_idx = linus_separator_idx + 1
+
+          # Extract version number for comparison (e.g., v7.1-rc1 -> (7, 1, 'rc1'))
+          def parse_version(tag):
+              match = re.match(r'v(\d+)\.(\d+)(?:-(.+))?', tag)
+              if match:
+                  major = int(match.group(1))
+                  minor = int(match.group(2))
+                  suffix = match.group(3) or ''
+                  return (major, minor, suffix)
+              return (0, 0, '')
+
+          new_version = parse_version(new_tag)
+
+          # Scan existing rows to find correct position
+          for i in range(linus_separator_idx + 1, len(lines)):
+              line = lines[i]
+              if not line.startswith('|'):
+                  # End of table
+                  break
+
+              # Extract tag from first column
+              match = re.match(r'\| ([^ ]+) \|', line)
+              if match:
+                  existing_tag = match.group(1)
+                  existing_version = parse_version(existing_tag)
+
+                  # Insert before this row if new tag is newer
+                  if new_version > existing_version:
+                      insert_idx = i
+                      break
+                  else:
+                      insert_idx = i + 1
+
+          # Insert the new row
+          lines.insert(insert_idx, new_row + '\n')
+
+          with open('results.md', 'w') as f:
+              f.writelines(lines)
+          PYEOF
+          fi
+
+      - name: commit results to gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add results.md
+          git diff --cached --quiet || \
+            git commit -m "results: linus ${{ needs.detect.outputs.target_tag }}" && \
+            git push origin gh-pages
