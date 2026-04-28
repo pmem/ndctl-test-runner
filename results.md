@@ -1,4 +1,14 @@
-# Daily Run Results
+# NDCTL Test Runner
+
+## Linus Mainline Release Tags
+
+Tests are run against Linus mainline release tags from [torvalds/linux](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git), using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending).
+
+| Kernel tag | Tag date | Tested at | Result | Attempts | Notes |
+|------------|----------|-----------|--------|----------|-------|
+|------------|----------|-----------|--------|----------|-------|
+
+## Daily Run Results
 
 Tests are run against the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending).
 
