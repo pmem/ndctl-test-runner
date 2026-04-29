@@ -102,8 +102,8 @@ jobs:
             } > results.md
           fi
 
-          # Insert new row at the top of the table (after the |---| separator)
-          # and add legend if missing
+          # Insert new row at the top of the Daily Branch Results table
+          # (after the second |---| separator, which is in the Unit Tests header row)
           python3 - "$NEW_ROW" << 'PYEOF'
           import sys
 
@@ -111,26 +111,17 @@ jobs:
           with open('results.md', 'r') as f:
               lines = f.readlines()
 
-          # Insert new row after table header separator
+          # Find the Daily Branch Results section, then find the Unit Tests header separator
+          in_daily_section = False
+          separator_count = 0
           for i, line in enumerate(lines):
-              if line.startswith('|---'):
-                  lines.insert(i + 1, new_row + '\n')
-                  break
-
-          # Add legend after table if not present
-          has_legend = any('**Legend:**' in line for line in lines)
-          if not has_legend:
-              legend = [
-                  '\n',
-                  '**Legend:**\n',
-                  '- `pass` = unit tests passed (pass [N] means N tests were skipped)\n',
-                  '- `fail` = unit tests failed OR build failed OR workflow failed\n',
-                  '- `—` = testing skipped, both kernel and ndctl branches were unchanged since last successful run\n'
-              ]
-              # Find last table row and insert legend after
-              for i in range(len(lines) - 1, -1, -1):
-                  if lines[i].startswith('|') and not lines[i].startswith('|---'):
-                      lines[i+1:i+1] = legend
+              if '## Daily Branch Results' in line:
+                  in_daily_section = True
+              if in_daily_section and line.startswith('|---'):
+                  separator_count += 1
+                  # Insert after the second separator (Unit Tests row)
+                  if separator_count == 2:
+                      lines.insert(i + 1, new_row + '\n')
                       break
 
           with open('results.md', 'w') as f:
