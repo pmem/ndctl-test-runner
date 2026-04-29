@@ -4,7 +4,7 @@
 
 All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending). Each tag is tested once and may be rerun if needed. The table shows the latest result for each tag.
 
-Click pass/fail results to view logs and details.
+Click pass/fail results to view logs and details (links are retained for 30 days).
 
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
 - <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure)
@@ -24,7 +24,7 @@ Daily automated test runs against active development branches using the [ndctl p
 - **[nvdimm/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=fixes)**: NVDIMM, DAX unit tests
 - **[linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/log/?h=master)**: CXL, NVDIMM, DAX unit tests (all)
 
-Click pass/fail results to view logs and details.
+Click pass/fail results to view logs and details (links are retained for 30 days).
 
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
 - <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure)
