@@ -127,13 +127,25 @@ jobs:
           RUN_ID="${{ github.run_id }}"
           RUN_URL="https://github.com/$REPO/actions/runs/$RUN_ID"
 
-          # Format tested_at timestamp in ET timezone
-          TESTED_AT=$(TZ=America/New_York date '+%Y-%m-%d %H:%M ET')
+          # Format tested_at timestamp (date only)
+          TESTED_AT=$(date -u '+%Y-%m-%d')
 
-          # Determine result
+          # Determine result and check for skipped tests
           TEST_CONCLUSION="${{ needs.test.result }}"
           if [[ "$TEST_CONCLUSION" == "success" ]]; then
-            RESULT="[<span style=\"color:green\">pass</span>]($RUN_URL)"
+            # Download artifacts and count skipped tests
+            SKIP_COUNT=0
+            if gh run download "$RUN_ID" -n "logs-all-$TARGET_TAG" -D "/tmp/artifact-$RUN_ID" 2>/dev/null; then
+              SKIP_COUNT=$(grep -E "Skipped:[ \t]+[0-9]+" "/tmp/artifact-$RUN_ID/tmp/rq_0.log" 2>/dev/null \
+                | awk '{print $NF}' | head -1)
+              rm -rf "/tmp/artifact-$RUN_ID"
+            fi
+
+            if [[ -n "$SKIP_COUNT" ]] && [[ "$SKIP_COUNT" -gt 0 ]]; then
+              RESULT="[<span style=\"color:green\">pass</span>]($RUN_URL) [$SKIP_COUNT]"
+            else
+              RESULT="[<span style=\"color:green\">pass</span>]($RUN_URL)"
+            fi
           else
             RESULT="[<span style=\"color:red\">fail</span>]($RUN_URL)"
           fi
