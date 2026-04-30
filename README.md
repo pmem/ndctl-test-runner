@@ -30,7 +30,7 @@ Five workflows run automatically each day, one per branch under test:
 - `libnvdimm/fixes` — nvdimm/nvdimm.git, nvdimm and dax tests
 - `linux-next/master` — next/linux-next.git, cxl, nvdimm, and dax tests
 
-**View nightly results:** https://pmem.github.io/ndctl-test-runner/
+**View daily results:** https://pmem.github.io/ndctl-test-runner/
 
 TODO: Add a weekly workflow to test new Linus release candidate tags (mainline).
 
@@ -233,7 +233,7 @@ the NDCTL Test Runner whenever commits are pushed.
 
 This works with **your fork** of ndctl-test-runner. You cannot trigger
 runs in `pmem/ndctl-test-runner` directly. If you have a public branch
-you would like added to the nightly runs in `pmem/ndctl-test-runner`
+you would like added to the daily runs in `pmem/ndctl-test-runner`
 (temporarily or long-term), open an issue in this repository and ask.
 
 Create the file `.github/workflows/ndctl-test.yml` in your kernel repo:

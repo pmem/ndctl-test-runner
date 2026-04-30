@@ -4,7 +4,7 @@ name: nightly results
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: '0 5 * * *'  # 10 pm PDT (UTC-7) / 9 pm PST (UTC-8), 4 hours after tests
+    - cron: '23 4 * * *'  # 04:23 UTC daily
   workflow_dispatch:
 
 jobs:
