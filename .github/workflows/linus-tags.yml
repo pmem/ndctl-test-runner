@@ -227,19 +227,19 @@ jobs:
           with open('results.md', 'r') as f:
               lines = f.readlines()
 
-          # Find the Linus Mainline Release Tags table
+          # Find the Mainline Tag Results table
           linus_header_idx = None
           linus_separator_idx = None
 
           for i, line in enumerate(lines):
-              if 'Linus Mainline Release Tags' in line or 'Mainline Release Tags' in line:
+              if 'Mainline Tag Results' in line or 'Linus Mainline Release Tags' in line or 'Mainline Release Tags' in line:
                   linus_header_idx = i
               if linus_header_idx is not None and line.startswith('|---'):
                   linus_separator_idx = i
                   break
 
           if linus_separator_idx is None:
-              print("Error: could not find Linus Mainline Release Tags table separator", file=sys.stderr)
+              print("Error: could not find Mainline Tag Results table separator", file=sys.stderr)
               sys.exit(1)
 
           # Find insertion point - maintain version sort order (newest first)
