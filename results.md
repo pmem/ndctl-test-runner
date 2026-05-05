@@ -2,10 +2,7 @@
 
 ## Mainline Tag Results
 
-All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending). Each tag is tested once and may be rerun if needed. The table shows the latest result for each tag.
-
-Click pass/fail results to view logs and details (links are retained for 30 days).
-
+All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending). Each tag is tested once and may be rerun if needed. The table shows the latest result for each tag. Click pass/fail results to view logs and details (links are retained for 30 days).
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
 - <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure)
 
@@ -17,10 +14,7 @@ Click pass/fail results to view logs and details (links are retained for 30 days
 
 ## Daily Branch Results
 
-Daily automated test runs against active development branches using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending).
-
-Click pass/fail results to view logs and details (links are retained for 30 days).
-
+Daily automated test runs against active development branches using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending). Click pass/fail results to view logs and details (links are retained for 30 days).
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
 - <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure)
 - `—` = testing skipped, both kernel and ndctl branches unchanged since last successful run
@@ -37,7 +31,7 @@ Click pass/fail results to view logs and details (links are retained for 30 days
 
 <div id="results-table-container" markdown="1">
 
-| **Date** | [cxl/next](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=next) | [cxl/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=fixes) | [nvdimm/next](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=for-next) | [nvdimm/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=fixes) | [linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/log/?h=master) | Notes |
+| **Date (UTC)** | [cxl/next](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=next) | [cxl/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=fixes) | [nvdimm/next](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=for-next) | [nvdimm/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=fixes) | [linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/log/?h=master) | Notes |
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
 | **Test Scope** | cxl | cxl | nvdimm/dax | nvdimm/dax | cxl/nvdimm/dax | |
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
@@ -71,29 +65,38 @@ Click pass/fail results to view logs and details (links are retained for 30 days
 
 <script>
 (function() {
-  const ROWS_PER_PAGE = 12;
+  const ROWS_PER_PAGE = 30;
+  const HEADER_ROWS = 3;  // Date header, separator, Test Scope row
   let currentPage = 1;
   let allRows = [];
   
   function init() {
+    console.log('Pagination init starting...');
+    
     const container = document.getElementById('results-table-container');
+    console.log('Container found:', !!container);
     if (!container) return;
     
     const table = container.querySelector('table');
+    console.log('Table found:', !!table);
     if (!table) return;
     
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
-    
-    // Get all data rows (exclude header rows)
-    allRows = Array.from(tbody.querySelectorAll('tr'));
+    // Get all rows from table (not just tbody)
+    const rows = Array.from(table.querySelectorAll('tr'));
+    console.log('Total rows in table:', rows.length);
+    allRows = rows.slice(HEADER_ROWS);
+    console.log('Data rows (after skipping headers):', allRows.length);
+    console.log('ROWS_PER_PAGE:', ROWS_PER_PAGE);
+    console.log('Should show pagination?', allRows.length > ROWS_PER_PAGE);
     
     if (allRows.length <= ROWS_PER_PAGE) {
       // Hide pagination if not needed
+      console.log('Hiding pagination - not enough rows');
       document.getElementById('pagination-controls').style.display = 'none';
       return;
     }
     
+    console.log('Setting up pagination...');
     showPage(1);
     updateButtons();
     
