@@ -64,9 +64,23 @@ jobs:
       test_suite:    "cxl"
       timeout_min:   "35"
 
-  mark:
+  test-retry:
     needs: [check, test]
-    if: needs.test.result == 'success'
+    if: needs.check.outputs.changed == 'true' && needs.test.result == 'failure'
+    uses: ./.github/workflows/main.yml
+    with:
+      kernel_repo:   "https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git"
+      kernel_branch: "next"
+      ndctl_repo:    "pmem/ndctl"
+      ndctl_branch:  "pending"
+      test_suite:    "cxl"
+      timeout_min:   "35"
+
+  mark:
+    needs: [check, test, test-retry]
+    if: |
+      always() &&
+      (needs.test.result == 'success' || needs.test-retry.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - run: echo "${{ needs.check.outputs.sha }}" > /tmp/.ndctl-tested
