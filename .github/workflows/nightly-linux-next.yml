@@ -4,7 +4,7 @@ name: linux-next/master
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: '23 0 * * *'  # 00:23 UTC daily
+    - cron: '57 3 * * *'  # 03:57 UTC daily (off-peak, staggered 50m after nvdimm)
   workflow_dispatch:
 
 run-name: "linux-next/master (${{ github.event_name }})"

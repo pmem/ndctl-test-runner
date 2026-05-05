@@ -4,7 +4,7 @@ name: libnvdimm/fixes
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: '23 0 * * *'  # 00:23 UTC daily
+    - cron: '07 3 * * *'  # 03:07 UTC daily (off-peak, staggered 50m after CXL)
   workflow_dispatch:
 
 run-name: "libnvdimm/fixes (${{ github.event_name }})"

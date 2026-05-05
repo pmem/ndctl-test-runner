@@ -4,7 +4,7 @@ name: cxl/next
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: '23 0 * * *'  # 00:23 UTC daily
+    - cron: '17 2 * * *'  # 02:17 UTC daily (off-peak)
   workflow_dispatch:
 
 run-name: "cxl/next (${{ github.event_name }})"
