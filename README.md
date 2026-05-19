@@ -8,8 +8,9 @@ with no special hardware required.
 This repository serves two purposes:
 
 **Scheduled testing of upstream kernel branches** — five workflows run
-daily against the major CXL, NVDIMM, and linux-next kernel trees, each
-tested against ndctl/pending. See [Scheduled Runs](#scheduled-runs).
+daily against the major CXL, NVDIMM, and linux-next kernel trees, and one
+workflow tests Linux mainline release tags as they appear. All are tested
+against ndctl/pending. See [Scheduled Runs](#scheduled-runs).
 
 **A reusable test runner for kernel developers** — fork this repository to
 run tests against your own kernel branches. Tests can be launched four ways:
@@ -30,14 +31,14 @@ Five workflows run automatically each day, one per branch under test:
 - `libnvdimm/fixes` — nvdimm/nvdimm.git, nvdimm and dax tests
 - `linux-next/master` — next/linux-next.git, cxl, nvdimm, and dax tests
 
-**View daily results:** https://pmem.github.io/ndctl-test-runner/
+One workflow runs against Linux mainline release tags as they appear.
 
-TODO: Add a weekly workflow to test new Linus release candidate tags (mainline).
+**View daily results:** https://pmem.github.io/ndctl-test-runner/results.html
 
 Each workflow appears as a separate entry in the **Actions** tab. Scheduled
 runs are labeled `(schedule)` in the run list.
 
-All five workflows use SHA deduplication: if neither the kernel branch nor
+All six workflows use SHA deduplication: if neither the kernel branch nor
 ndctl/pending has changed since the last successful run, the test is skipped
 and no runner time is consumed.
 
@@ -229,12 +230,7 @@ and the full `rq_0.log` is uploaded as an artifact for detailed analysis.
 ## Automatically Trigger Tests From Your Kernel Repository
 
 Developers may configure their kernel repository to automatically trigger
-the NDCTL Test Runner whenever commits are pushed.
-
-This works with **your fork** of ndctl-test-runner. You cannot trigger
-runs in `pmem/ndctl-test-runner` directly. If you have a public branch
-you would like added to the daily runs in `pmem/ndctl-test-runner`
-(temporarily or long-term), open an issue in this repository and ask.
+the NDCTL Test Runner in their fork whenever commits are pushed.
 
 Create the file `.github/workflows/ndctl-test.yml` in your kernel repo:
 
