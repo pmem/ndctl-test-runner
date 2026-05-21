@@ -37,6 +37,7 @@ Daily automated test runs against active development branches using the [ndctl p
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
 | **Test Scope** | cxl | cxl | nvdimm/dax | nvdimm/dax | cxl/nvdimm/dax | |
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
+| 2026-05-21 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26212404930) |  |
 | 2026-05-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26145540758) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26145530130) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26146580460) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26146583556) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26148225653) |  |
 | 2026-05-19 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26083062048) |  |
 | 2026-05-18 | — | — | — | — | — |  |
