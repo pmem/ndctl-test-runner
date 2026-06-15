@@ -264,15 +264,17 @@ jobs:
           # Find insertion point - maintain version sort order (newest first)
           insert_idx = linus_separator_idx + 1
 
-          # Extract version number for comparison (e.g., v7.1-rc1 -> (7, 1, 'rc1'))
+          # Extract version for comparison; final releases sort above RCs of the
+          # same version: v7.1 > v7.1-rc7 > v7.1-rc1.
+          # Encode: final -> rc_num = infinity (float('inf')), RC -> rc_num = N.
           def parse_version(tag):
-              match = re.match(r'v(\d+)\.(\d+)(?:-(.+))?', tag)
+              match = re.match(r'v(\d+)\.(\d+)(?:-rc(\d+))?$', tag)
               if match:
                   major = int(match.group(1))
                   minor = int(match.group(2))
-                  suffix = match.group(3) or ''
-                  return (major, minor, suffix)
-              return (0, 0, '')
+                  rc_num = int(match.group(3)) if match.group(3) is not None else float('inf')
+                  return (major, minor, rc_num)
+              return (0, 0, 0)
 
           new_version = parse_version(new_tag)
 
