@@ -43,14 +43,33 @@ jobs:
             echo "Fetching tags from $LINUS_REPO"
             git clone --bare --filter=blob:none "$LINUS_REPO" /tmp/linus-repo
 
-            # Get latest tag matching v[0-9]*
-            TARGET_TAG=$(git -C /tmp/linus-repo tag -l 'v[0-9]*' \
-              | sort -V \
-              | tail -1)
+            # Get latest tag - prefer a final release over an RC of the same version.
+            # sort -V puts v7.1-rc7 after v7.1 (suffix > no suffix), so we must
+            # compare explicitly: use the latest non-RC unless the latest RC is for
+            # a strictly newer major.minor (e.g., v7.2-rc1 when v7.1 is latest final).
+            ALL_TAGS=$(git -C /tmp/linus-repo tag -l 'v[0-9]*')
+            LATEST_FINAL=$(echo "$ALL_TAGS" | grep -v -- '-rc' | sort -V | tail -1)
+            LATEST_ANY=$(echo "$ALL_TAGS" | sort -V | tail -1)
 
-            if [[ -z "$TARGET_TAG" ]]; then
+            if [[ -z "$LATEST_ANY" ]]; then
               echo "Error: no tags found matching v[0-9]*"
               exit 1
+            fi
+
+            if [[ -n "$LATEST_FINAL" ]]; then
+              # Check if the latest RC is for a newer version than the latest final release
+              RC_BASE=$(echo "$LATEST_ANY" | sed 's/-rc[0-9]*$//')
+              NEWER_BASE=$(printf '%s\n%s\n' "$LATEST_FINAL" "$RC_BASE" | sort -V | tail -1)
+              if [[ "$RC_BASE" != "$LATEST_FINAL" && "$NEWER_BASE" == "$RC_BASE" ]]; then
+                # RC is for a newer version (e.g., LATEST_FINAL=v7.1, LATEST_ANY=v7.2-rc1)
+                TARGET_TAG="$LATEST_ANY"
+              else
+                # Final release is current (e.g., v7.1 supersedes v7.1-rc7)
+                TARGET_TAG="$LATEST_FINAL"
+              fi
+            else
+              # No final releases yet, use the latest RC
+              TARGET_TAG="$LATEST_ANY"
             fi
 
             echo "Auto-detected latest tag: $TARGET_TAG"
