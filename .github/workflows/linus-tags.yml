@@ -164,8 +164,10 @@ jobs:
             # Download artifacts and count skipped tests
             SKIP_COUNT=0
             if gh run download "$RUN_ID" -n "logs-all-$TARGET_TAG" -D "/tmp/artifact-$RUN_ID" 2>/dev/null; then
-              SKIP_COUNT=$(grep -E "Skipped:[ \t]+[0-9]+" "/tmp/artifact-$RUN_ID/tmp/rq_0.log" 2>/dev/null \
-                | awk '{print $NF}' | head -1)
+              # Extract just the digits; the summary line may carry a
+              # trailing CR/whitespace that would defeat awk '{print $NF}'.
+              SKIP_COUNT=$(grep -oE "Skipped:[[:space:]]+[0-9]+" "/tmp/artifact-$RUN_ID/tmp/rq_0.log" 2>/dev/null \
+                | grep -oE "[0-9]+" | head -1)
               rm -rf "/tmp/artifact-$RUN_ID"
             fi
 
