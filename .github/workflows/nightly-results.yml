@@ -12,10 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
     steps:
       - uses: actions/checkout@v4
         with:
           ref: gh-pages
+
+      # CI helper scripts live on main; pull just scripts/ so we can open
+      # issues and refresh their open/closed status.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _main
+          sparse-checkout: scripts
 
       - name: collect nightly results
         env:
@@ -25,8 +34,16 @@ jobs:
           REPO="${{ github.repository }}"
           TODAY=$(date -u +%Y-%m-%d)
 
+          # File issues only on the first aggregation for today; a manual
+          # re-run must not open duplicate issues for the same failures.
+          FILE_ISSUES=1
+          [[ -f results.md ]] && grep -q "^| $TODAY |" results.md && FILE_ISSUES=0
+
+          # Collected "[#N](url) (open)" links for today's failing branches.
+          ISSUE_LINKS_FILE=$(mktemp)
+
           status_of() {
-            local wf=$1
+            local wf=$1 scope=$2
             local run_date conclusion run_id test_conclusion
 
             read -r run_id conclusion run_date < <(
@@ -42,6 +59,21 @@ jobs:
             local run_url="https://github.com/$REPO/actions/runs/$run_id"
 
             if [[ "$conclusion" == "failure" ]]; then
+              if [[ "$FILE_ISSUES" == "1" ]]; then
+                # Best-effort: fetch the run log so the issue carries a signature.
+                local logdir="/tmp/faillog-$run_id" logfile=""
+                if gh run download "$run_id" -D "$logdir" 2>/dev/null; then
+                  logfile=$(find "$logdir" -name rq_0.log 2>/dev/null | head -1)
+                fi
+                local title="$scope daily test failure — $TODAY (run $run_id)"
+                local issue_url
+                issue_url=$(_main/scripts/ci_open_issue.sh \
+                  "$REPO" "$title" "$scope" "$TODAY" "$run_url" "$logfile" || echo "")
+                rm -rf "$logdir"
+                if [[ -n "$issue_url" ]]; then
+                  echo "[#${issue_url##*/}]($issue_url) (open)" >> "$ISSUE_LINKS_FILE"
+                fi
+              fi
               echo "[<span style=\"color:red\">fail</span>]($run_url)"
               return
             fi
@@ -75,13 +107,21 @@ jobs:
             fi
           }
 
-          CXL_NEXT=$(status_of      "nightly-cxl-next.yml")
-          CXL_FIXES=$(status_of     "nightly-cxl-fixes.yml")
-          FOR_NEXT=$(status_of      "nightly-nvdimm-for-next.yml")
-          NVDIMM_FIXES=$(status_of  "nightly-nvdimm-fixes.yml")
-          LINUX_NEXT=$(status_of    "nightly-linux-next.yml")
+          CXL_NEXT=$(status_of      "nightly-cxl-next.yml"        "cxl/next")
+          CXL_FIXES=$(status_of     "nightly-cxl-fixes.yml"       "cxl/fixes")
+          FOR_NEXT=$(status_of      "nightly-nvdimm-for-next.yml" "nvdimm/for-next")
+          NVDIMM_FIXES=$(status_of  "nightly-nvdimm-fixes.yml"    "nvdimm/fixes")
+          LINUX_NEXT=$(status_of    "nightly-linux-next.yml"      "linux-next")
 
-          NEW_ROW="| $TODAY | $CXL_NEXT | $CXL_FIXES | $FOR_NEXT | $NVDIMM_FIXES | $LINUX_NEXT |  |"
+          # Any issues opened above (one per failing branch) share the row's
+          # single Issues cell, space-separated.
+          ISSUES_CELL=" "
+          if [[ -s "$ISSUE_LINKS_FILE" ]]; then
+            ISSUES_CELL=" $(paste -sd' ' "$ISSUE_LINKS_FILE") "
+          fi
+          rm -f "$ISSUE_LINKS_FILE"
+
+          NEW_ROW="| $TODAY | $CXL_NEXT | $CXL_FIXES | $FOR_NEXT | $NVDIMM_FIXES | $LINUX_NEXT |$ISSUES_CELL|"
 
           if [[ ! -f results.md ]]; then
             {
@@ -97,7 +137,7 @@ jobs:
               echo ''
               echo 'Click through on the pass/fail results to lookup the kernel and ndctl SHA under test.'
               echo ''
-              echo '| Date | cxl/next | cxl/fixes | nvdimm/for-next | nvdimm/fixes | linux-next | Notes |'
+              echo '| Date | cxl/next | cxl/fixes | nvdimm/for-next | nvdimm/fixes | linux-next | Issues |'
               echo '|------|:--------:|:---------:|:---------------:|:------------:|:----------:|-------|'
             } > results.md
           fi
@@ -127,6 +167,15 @@ jobs:
           with open('results.md', 'w') as f:
               f.writelines(lines)
           PYEOF
+
+      - name: refresh issue open/closed status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Bake any open->closed transitions into the committed file so the
+          # status word is correct even with JavaScript disabled.
+          _main/scripts/ci_refresh_issue_status.sh "${{ github.repository }}" results.md
 
       - name: commit results to gh-pages
         run: |

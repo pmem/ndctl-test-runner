@@ -50,6 +50,21 @@ uploaded as a workflow artifact and can be downloaded from the run page for
 detailed per-test analysis.
 
 
+## Failure Tracking
+
+When a scheduled run fails, a GitHub issue is opened automatically and linked
+from the **Issues** column of the [results page](https://pmem.github.io/ndctl-test-runner/results.html).
+Each issue is given a descriptive title and a brief automatic triage: the run
+log is inspected to classify the failure (kernel/ndctl build break vs. unit
+test failure) and the relevant lines are captured as a failure signature in the
+issue body, so the nature of the break is visible without downloading the log.
+Because log artifacts are retained for only about 30 days, the issue preserves
+this signature after the log itself expires.
+
+The Issues column annotates each link with `(open)` or `(closed)` so the
+current state is visible at a glance.
+
+
 ## Quick Start
 
 1. Fork this repository.
