@@ -8,9 +8,9 @@ All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) usin
 
 | Kernel Tag | Date Tagged | Date Tested | Result | Attempts | Issues |
 |------------|-------------|-------------|--------|----------|-------|
-| v7.2-rc4 | 2026-07-19 | 2026-07-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29742204649) | 1 |  |
-| v7.2-rc3 | 2026-07-12 | 2026-07-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29250849094) | 1 |  |
-| v7.2-rc2 | 2026-07-05 | 2026-07-06 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28797344765) | 1 |  |
+| v7.2-rc4 | 2026-07-19 | 2026-07-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29742204649) [1] | 1 |  |
+| v7.2-rc3 | 2026-07-12 | 2026-07-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29250849094) [1] | 1 |  |
+| v7.2-rc2 | 2026-07-05 | 2026-07-06 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28797344765) [1] | 1 |  |
 | v7.2-rc1 | 2026-06-28 | 2026-06-29 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28379508764) | 1 |  |
 | v7.1 | 2026-06-14 | 2026-06-15 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27573852969) | 1 |  |
 | v7.1-rc7 | 2026-06-07 | 2026-06-08 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27144818896) | 1 |  |
@@ -45,7 +45,7 @@ Daily automated test runs against active development branches using the [ndctl p
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
 | **Test Scope** | cxl | cxl | nvdimm/dax | nvdimm/dax | cxl/nvdimm/dax | |
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
-| 2026-07-22 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893941182) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893923480) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895497563) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895502194) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29896311408) | [#4](https://github.com/pmem/ndctl-test-runner/issues/4) (open) |
+| 2026-07-22 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893941182) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893923480) [1] | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895497563) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895502194) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29896311408) | [#4](https://github.com/pmem/ndctl-test-runner/issues/4) (open) |
 | 2026-07-21 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29806645313) |  |
 | 2026-07-20 | — | — | — | — | — |  |
 | 2026-07-19 | — | — | — | — | — |  |
