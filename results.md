@@ -35,7 +35,7 @@ Daily automated test runs against active development branches using the [ndctl p
 }
 #results-table-container table td:last-child {
   font-size: 0.85em;
-  min-width: 200px;
+  white-space: nowrap;
 }
 </style>
 
@@ -154,7 +154,8 @@ Daily automated test runs against active development branches using the [ndctl p
 <script>
 (function() {
   const ROWS_PER_PAGE = 30;
-  const HEADER_ROWS = 3;  // Date header, separator, Test Scope row
+  const HEADER_ROWS = 2;  // Date header <tr> + Test Scope <tr>
+                          // (markdown |---| separators are not rendered as rows)
   let currentPage = 1;
   let allRows = [];
   
