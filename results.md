@@ -6,7 +6,7 @@ All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) usin
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
 - <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure)
 
-| Kernel Tag | Date Tagged | Date Tested | Result | Attempts | Notes |
+| Kernel Tag | Date Tagged | Date Tested | Result | Attempts | Issues |
 |------------|-------------|-------------|--------|----------|-------|
 | v7.2-rc4 | 2026-07-19 | 2026-07-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29742204649) | 1 |  |
 | v7.2-rc3 | 2026-07-12 | 2026-07-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29250849094) | 1 |  |
@@ -41,11 +41,11 @@ Daily automated test runs against active development branches using the [ndctl p
 
 <div id="results-table-container" markdown="1">
 
-| **Date (UTC)** | [cxl/next](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=next) | [cxl/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=fixes) | [nvdimm/next](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=for-next) | [nvdimm/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=fixes) | [linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/log/?h=master) | Notes |
+| **Date (UTC)** | [cxl/next](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=next) | [cxl/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=fixes) | [nvdimm/next](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=for-next) | [nvdimm/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=fixes) | [linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/log/?h=master) | Issues |
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
 | **Test Scope** | cxl | cxl | nvdimm/dax | nvdimm/dax | cxl/nvdimm/dax | |
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
-| 2026-07-22 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893941182) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893923480) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895497563) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895502194) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29896311408) |  |
+| 2026-07-22 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893941182) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893923480) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895497563) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895502194) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29896311408) | [#4](https://github.com/pmem/ndctl-test-runner/issues/4) (open) |
 | 2026-07-21 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29806645313) |  |
 | 2026-07-20 | — | — | — | — | — |  |
 | 2026-07-19 | — | — | — | — | — |  |
@@ -118,7 +118,7 @@ Daily automated test runs against active development branches using the [ndctl p
 | 2026-05-12 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25716061910) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25716046263) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25717207199) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25717215091) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25717601830) |  |
 | 2026-05-11 | — | — | — | — | — |  |
 | 2026-05-10 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25621805550) |  |
-| 2026-05-09 | — | — | — | — | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25593714112) |  |
+| 2026-05-09 | — | — | — | — | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25593714112) | [#3](https://github.com/pmem/ndctl-test-runner/issues/3) (open) |
 | 2026-05-08 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25539331276) |  |
 | 2026-05-07 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25479736528) |  |
 | 2026-05-06 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25419834190) |  |
@@ -137,11 +137,11 @@ Daily automated test runs against active development branches using the [ndctl p
 | 2026-04-23 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24816367663) |  |
 | 2026-04-22 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24759704519) |  |
 | 2026-04-21 | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24703524511) | — | — |  |
-| 2026-04-21 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700726311) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700728870) [2] | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700730266) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700731725) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700733076) | btt-check.sh failed with race condition, [patch posted](https://lore.kernel.org/nvdimm/20260424234405.3762827-1-alison.schofield@intel.com/) |
+| 2026-04-21 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700726311) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700728870) [2] | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700730266) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700731725) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700733076) | [#2](https://github.com/pmem/ndctl-test-runner/issues/2) (open) |
 | 2026-04-20 | — | — | — | — | — |  |
 | 2026-04-19 | — | — | — | — | — |  |
 | 2026-04-18 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24597877527) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598073311) [2] | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598121074) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598096412) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598099329) |  |
-| 2026-04-16 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497568304) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24527494181) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497288926) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498382832) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498495818) | cxl/fixes build timeout issue. Passed on rerun. |
+| 2026-04-16 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497568304) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24527494181) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497288926) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498382832) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498495818) | [#1](https://github.com/pmem/ndctl-test-runner/issues/1) (open) |
 
 <div id="pagination-controls" style="margin: 20px 0; text-align: center; display: flex; justify-content: center; align-items: center;">
   <button id="prev-btn" style="padding: 5px 10px; margin: 0 5px; cursor: pointer; font-size: 0.85em;">← prev</button>
@@ -224,6 +224,81 @@ Daily automated test runs against active development branches using the [ndctl p
   }
   
   // Run after page loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+<script>
+// Live open/closed status for issue links in the Issues column.
+// The committed markdown carries the last-known status word ("(open)"/"(closed)"),
+// refreshed daily by the nightly-results workflow. This layer only re-checks the
+// issues still marked "(open)" so a freshly-closed issue flips right away, without
+// waiting for the next daily run. Closed issues are never re-queried, and answers
+// are cached in localStorage (~10 min) to stay well under GitHub's unauthenticated
+// rate limit (60 req/hr/IP). Degrades gracefully: if JS is off or the API is
+// unreachable, the committed word is shown as-is.
+(function() {
+  const REPO = 'pmem/ndctl-test-runner';
+  const TTL_MS = 10 * 60 * 1000;  // cache lifetime
+  const ISSUE_RE = new RegExp('/' + REPO.replace('/', '\\/') + '/issues/(\\d+)$');
+
+  function cacheGet(n) {
+    try {
+      const raw = localStorage.getItem('issue-state-' + n);
+      if (!raw) return null;
+      const { state, ts } = JSON.parse(raw);
+      return (Date.now() - ts < TTL_MS) ? state : null;
+    } catch (e) { return null; }
+  }
+  function cacheSet(n, state) {
+    try {
+      localStorage.setItem('issue-state-' + n, JSON.stringify({ state, ts: Date.now() }));
+    } catch (e) { /* ignore quota/availability errors */ }
+  }
+
+  // Rewrite the "(open)"/"(closed)" word that trails an issue link within its cell.
+  function applyState(anchor, state) {
+    const cell = anchor.closest('td');
+    if (!cell) return;
+    cell.innerHTML = cell.innerHTML.replace(
+      /\((open|closed)\)/,
+      '(' + state + ')'
+    );
+  }
+
+  async function refresh(n, anchor) {
+    const cached = cacheGet(n);
+    if (cached) { applyState(anchor, cached); return; }
+    try {
+      const resp = await fetch(
+        'https://api.github.com/repos/' + REPO + '/issues/' + n,
+        { headers: { 'Accept': 'application/vnd.github+json' } }
+      );
+      if (!resp.ok) return;  // rate-limited or missing: keep committed word
+      const data = await resp.json();
+      if (data && data.state) {
+        cacheSet(n, data.state);
+        applyState(anchor, data.state);
+      }
+    } catch (e) { /* offline etc: keep committed word */ }
+  }
+
+  function init() {
+    const anchors = Array.from(document.querySelectorAll('a'))
+      .filter(a => ISSUE_RE.test(a.getAttribute('href') || ''));
+    anchors.forEach(a => {
+      const cell = a.closest('td');
+      // Only re-check issues the committed file still marks "(open)".
+      if (!cell || !/\(open\)/.test(cell.textContent)) return;
+      const n = a.getAttribute('href').match(ISSUE_RE)[1];
+      refresh(n, a);
+    });
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
