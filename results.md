@@ -4,8 +4,7 @@
 
 All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending). Each tag is tested once and may be rerun if needed. The table shows the latest result for each tag. Click pass/fail results to view logs and details (links are retained for 30 days).
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
-- <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure)
-- fail [#N] = an issue tracks the failure; <span class="issue-status issue-open">●</span> open, <span class="issue-status issue-closed">✓</span> resolved
+- <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure); a trailing [#N] links its tracking issue, <span class="issue-status issue-open">●</span> open, <span class="issue-status issue-closed">✓</span> resolved
 
 | Kernel Tag | Date Tagged | Date Tested | Result | Attempts |
 |------------|-------------|-------------|--------|----------|
@@ -27,8 +26,7 @@ All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) usin
 
 Daily automated test runs against active development branches using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending). Click pass/fail results to view logs and details (links are retained for 30 days).
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
-- <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure)
-- fail [#N] = an issue tracks the failure; <span class="issue-status issue-open">●</span> open, <span class="issue-status issue-closed">✓</span> resolved
+- <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure); a trailing [#N] links its tracking issue, <span class="issue-status issue-open">●</span> open, <span class="issue-status issue-closed">✓</span> resolved
 - `—` = testing skipped, both kernel and ndctl branches unchanged since last successful run
 
 <style>
