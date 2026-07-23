@@ -184,28 +184,71 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Retry to ride out transient server-side aborts ("early EOF",
+          # "fetch-pack: invalid index-pack output") that git.kernel.org and
+          # GitHub occasionally hand out under load. The clone target is wiped
+          # between attempts so a half-written tree never lingers.
+          clone_retry() {
+            local dir=$1; shift
+            local attempts=3 delay=15 i
+            for (( i=1; i<=attempts; i++ )); do
+              rm -rf "$dir"
+              if git "$@"; then
+                return 0
+              fi
+              echo "::warning::clone of '$dir' failed (attempt $i/$attempts)"
+              if (( i < attempts )); then
+                echo "retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$(( delay * 2 ))
+              fi
+            done
+            echo "::error::clone of '$dir' failed after $attempts attempts"
+            return 1
+          }
+
           if [[ "$NDCTL_REPO" =~ ^https?://|^git://|^ssh://|^git@ ]]; then
-            git clone --depth 1 --branch "$NDCTL_BRANCH" "$NDCTL_REPO" ndctl
+            NDCTL_URL="$NDCTL_REPO"
           else
-            git clone --depth 1 --branch "$NDCTL_BRANCH" "https://github.com/${NDCTL_REPO}.git" ndctl
+            NDCTL_URL="https://github.com/${NDCTL_REPO}.git"
           fi
+          clone_retry ndctl clone --depth 1 --branch "$NDCTL_BRANCH" "$NDCTL_URL" ndctl
 
       - name: checkout kernel
         shell: bash
         run: |
           set -euo pipefail
           export GIT_LFS_SKIP_SMUDGE=1
+          # See "checkout ndctl": retry transient clone aborts, wiping any
+          # partial tree between attempts.
+          clone_retry() {
+            local dir=$1; shift
+            local attempts=3 delay=15 i
+            for (( i=1; i<=attempts; i++ )); do
+              rm -rf "$dir"
+              if git "$@"; then
+                return 0
+              fi
+              echo "::warning::clone of '$dir' failed (attempt $i/$attempts)"
+              if (( i < attempts )); then
+                echo "retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$(( delay * 2 ))
+              fi
+            done
+            echo "::error::clone of '$dir' failed after $attempts attempts"
+            return 1
+          }
+
           if [[ "$KERNEL_REPO" =~ ^https?://|^git://|^ssh://|^git@ ]]; then
-            git -c submodule.recurse=false clone \
-              --depth 1 --single-branch \
-              --branch "$KERNEL_BRANCH" \
-              "$KERNEL_REPO" kernel
+            KERNEL_URL="$KERNEL_REPO"
           else
-            git -c submodule.recurse=false clone \
-              --depth 1 --single-branch \
-              --branch "$KERNEL_BRANCH" \
-              "https://github.com/${KERNEL_REPO}.git" kernel
+            KERNEL_URL="https://github.com/${KERNEL_REPO}.git"
           fi
+          clone_retry kernel -c submodule.recurse=false clone \
+            --depth 1 --single-branch \
+            --branch "$KERNEL_BRANCH" \
+            "$KERNEL_URL" kernel
 
       - name: plan selected test suite
         id: suiteplan
