@@ -39,9 +39,6 @@ jobs:
           FILE_ISSUES=1
           [[ -f results.md ]] && grep -q "^| $TODAY |" results.md && FILE_ISSUES=0
 
-          # Collected "[#N](url) (open)" links for today's failing branches.
-          ISSUE_LINKS_FILE=$(mktemp)
-
           status_of() {
             local wf=$1 scope=$2
             local run_date conclusion run_id test_conclusion
@@ -59,6 +56,9 @@ jobs:
             local run_url="https://github.com/$REPO/actions/runs/$run_id"
 
             if [[ "$conclusion" == "failure" ]]; then
+              # A fresh failure gets an issue whose link and open/closed marker
+              # ride along in the fail cell: "[fail](run) [#N](issue) ●".
+              local marker=""
               if [[ "$FILE_ISSUES" == "1" ]]; then
                 # Best-effort: fetch the run log so the issue carries a signature.
                 local logdir="/tmp/faillog-$run_id" logfile=""
@@ -71,10 +71,10 @@ jobs:
                   "$REPO" "$title" "$scope" "$TODAY" "$run_url" "$logfile" || echo "")
                 rm -rf "$logdir"
                 if [[ -n "$issue_url" ]]; then
-                  echo "[#${issue_url##*/}]($issue_url) (open)" >> "$ISSUE_LINKS_FILE"
+                  marker=" [#${issue_url##*/}]($issue_url) <span class=\"issue-status issue-open\">●</span>"
                 fi
               fi
-              echo "[<span style=\"color:red\">fail</span>]($run_url)"
+              echo "[<span style=\"color:red\">fail</span>]($run_url)$marker"
               return
             fi
 
@@ -115,15 +115,9 @@ jobs:
           NVDIMM_FIXES=$(status_of  "nightly-nvdimm-fixes.yml"    "nvdimm/fixes")
           LINUX_NEXT=$(status_of    "nightly-linux-next.yml"      "linux-next")
 
-          # Any issues opened above (one per failing branch) share the row's
-          # single Issues cell, space-separated.
-          ISSUES_CELL=" "
-          if [[ -s "$ISSUE_LINKS_FILE" ]]; then
-            ISSUES_CELL=" $(paste -sd' ' "$ISSUE_LINKS_FILE") "
-          fi
-          rm -f "$ISSUE_LINKS_FILE"
-
-          NEW_ROW="| $TODAY | $CXL_NEXT | $CXL_FIXES | $FOR_NEXT | $NVDIMM_FIXES | $LINUX_NEXT |$ISSUES_CELL|"
+          # Any issue opened for a failing branch rides inline in that branch's
+          # cell (see status_of), so there is no separate Issues column.
+          NEW_ROW="| $TODAY | $CXL_NEXT | $CXL_FIXES | $FOR_NEXT | $NVDIMM_FIXES | $LINUX_NEXT |"
 
           if [[ ! -f results.md ]]; then
             {
@@ -139,8 +133,8 @@ jobs:
               echo ''
               echo 'Click through on the pass/fail results to lookup the kernel and ndctl SHA under test.'
               echo ''
-              echo '| Date | cxl/next | cxl/fixes | nvdimm/for-next | nvdimm/fixes | linux-next | Issues |'
-              echo '|------|:--------:|:---------:|:---------------:|:------------:|:----------:|-------|'
+              echo '| Date | cxl/next | cxl/fixes | nvdimm/for-next | nvdimm/fixes | linux-next |'
+              echo '|------|:--------:|:---------:|:---------------:|:------------:|:----------:|'
             } > results.md
           fi
 

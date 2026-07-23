@@ -180,9 +180,10 @@ jobs:
             RESULT="[<span style=\"color:red\">fail</span>]($RUN_URL)"
           fi
 
-          # On failure, open an issue with an auto-triaged signature. Reuse the
-          # link on reruns rather than filing duplicates.
-          NEW_ISSUE_LINK=""
+          # On failure, open an issue with an auto-triaged signature and fold its
+          # link + open marker into the Result cell: "[fail](run) [#N](issue) ●".
+          # The table shows only the latest attempt, so a passing rerun drops the
+          # marker (the issue itself remains on GitHub).
           if [[ "$TEST_CONCLUSION" != "success" ]]; then
             LOGDIR="/tmp/faillog-$RUN_ID"; LOGFILE=""
             if gh run download "$RUN_ID" -n "logs-all-$TARGET_TAG" -D "$LOGDIR" 2>/dev/null; then
@@ -193,34 +194,22 @@ jobs:
               "$TARGET_TAG tag test failure — $TESTED_AT (run $RUN_ID)" \
               "$TARGET_TAG (mainline tag)" "$TESTED_AT" "$RUN_URL" "$LOGFILE" || echo "")
             rm -rf "$LOGDIR"
-            [[ -n "$ISSUE_URL" ]] && NEW_ISSUE_LINK="[#${ISSUE_URL##*/}]($ISSUE_URL) (open)"
+            [[ -n "$ISSUE_URL" ]] && RESULT="$RESULT [#${ISSUE_URL##*/}]($ISSUE_URL) <span class=\"issue-status issue-open\">●</span>"
           fi
 
           # Check if row already exists (this is a rerun)
           if grep -q "^| $TARGET_TAG |" results.md; then
             echo "Updating existing row for $TARGET_TAG (rerun)"
 
-            # Extract current attempts count and existing Issues cell
+            # Extract current attempts count
             CURRENT_LINE=$(grep "^| $TARGET_TAG |" results.md)
             CURRENT_ATTEMPTS=$(echo "$CURRENT_LINE" | awk -F'|' '{print $6}' | xargs)
-            CURRENT_ISSUES=$(echo "$CURRENT_LINE" | awk -F'|' '{print $7}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
             # Increment attempts
             NEW_ATTEMPTS=$((CURRENT_ATTEMPTS + 1))
 
-            # Preserve any prior issue links; append this rerun's issue if it
-            # also failed. A passing rerun leaves the existing links intact.
-            NEW_ISSUES="$CURRENT_ISSUES"
-            if [[ -n "$NEW_ISSUE_LINK" ]]; then
-              if [[ -n "$NEW_ISSUES" ]]; then
-                NEW_ISSUES="$NEW_ISSUES $NEW_ISSUE_LINK"
-              else
-                NEW_ISSUES="$NEW_ISSUE_LINK"
-              fi
-            fi
-
             # Build new row
-            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT | $NEW_ATTEMPTS | $NEW_ISSUES |"
+            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT | $NEW_ATTEMPTS |"
 
             # Replace the row using Python
             python3 - "$TARGET_TAG" "$NEW_ROW" << 'PYEOF'
@@ -244,7 +233,7 @@ jobs:
             echo "Adding new row for $TARGET_TAG (first test)"
 
             # First test of this tag
-            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT | 1 | $NEW_ISSUE_LINK |"
+            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT | 1 |"
 
             # Insert new row in the Linus Mainline Release Tags section
             python3 - "$NEW_ROW" "$TARGET_TAG" << 'PYEOF'
