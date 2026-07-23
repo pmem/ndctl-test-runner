@@ -5,144 +5,146 @@
 All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending). Each tag is tested once and may be rerun if needed. The table shows the latest result for each tag. Click pass/fail results to view logs and details (links are retained for 30 days).
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
 - <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure)
+- fail [#N] = an issue tracks the failure; <span class="issue-status issue-open">●</span> open, <span class="issue-status issue-closed">✓</span> resolved
 
-| Kernel Tag | Date Tagged | Date Tested | Result | Attempts | Issues |
-|------------|-------------|-------------|--------|----------|-------|
-| v7.2-rc4 | 2026-07-19 | 2026-07-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29742204649) [1] | 1 |  |
-| v7.2-rc3 | 2026-07-12 | 2026-07-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29250849094) [1] | 1 |  |
-| v7.2-rc2 | 2026-07-05 | 2026-07-06 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28797344765) [1] | 1 |  |
-| v7.2-rc1 | 2026-06-28 | 2026-06-29 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28379508764) | 1 |  |
-| v7.1 | 2026-06-14 | 2026-06-15 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27573852969) | 1 |  |
-| v7.1-rc7 | 2026-06-07 | 2026-06-08 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27144818896) | 1 |  |
-| v7.1-rc6 | 2026-05-31 | 2026-06-01 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26767313370) | 1 |  |
-| v7.1-rc5 | 2026-05-24 | 2026-05-25 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26403585961) | 1 |  |
-| v7.1-rc4 | 2026-05-17 | 2026-05-18 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26038371655) | 1 |  |
-| v7.1-rc3 | 2026-05-10 | 2026-05-11 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25672722173) | 1 |  |
-| v7.1-rc2 | 2026-05-03 | 2026-05-04 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25317995626) | 1 |  |
-| v7.1-rc1 | 2026-04-26 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082127859) | 1 |  |
-| v7.0 | 2026-04-12 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082119712) [2] | 1 |  |
+| Kernel Tag | Date Tagged | Date Tested | Result | Attempts |
+|------------|-------------|-------------|--------|----------|
+| v7.2-rc4 | 2026-07-19 | 2026-07-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29742204649) [1] | 1 |
+| v7.2-rc3 | 2026-07-12 | 2026-07-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29250849094) [1] | 1 |
+| v7.2-rc2 | 2026-07-05 | 2026-07-06 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28797344765) [1] | 1 |
+| v7.2-rc1 | 2026-06-28 | 2026-06-29 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28379508764) | 1 |
+| v7.1 | 2026-06-14 | 2026-06-15 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27573852969) | 1 |
+| v7.1-rc7 | 2026-06-07 | 2026-06-08 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27144818896) | 1 |
+| v7.1-rc6 | 2026-05-31 | 2026-06-01 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26767313370) | 1 |
+| v7.1-rc5 | 2026-05-24 | 2026-05-25 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26403585961) | 1 |
+| v7.1-rc4 | 2026-05-17 | 2026-05-18 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26038371655) | 1 |
+| v7.1-rc3 | 2026-05-10 | 2026-05-11 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25672722173) | 1 |
+| v7.1-rc2 | 2026-05-03 | 2026-05-04 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25317995626) | 1 |
+| v7.1-rc1 | 2026-04-26 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082127859) | 1 |
+| v7.0 | 2026-04-12 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082119712) [2] | 1 |
 
 ## Daily Branch Results
 
 Daily automated test runs against active development branches using the [ndctl pending branch](https://github.com/pmem/ndctl/tree/pending). Click pass/fail results to view logs and details (links are retained for 30 days).
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
 - <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure)
+- fail [#N] = an issue tracks the failure; <span class="issue-status issue-open">●</span> open, <span class="issue-status issue-closed">✓</span> resolved
 - `—` = testing skipped, both kernel and ndctl branches unchanged since last successful run
 
 <style>
 #results-table-container table td:first-child {
   white-space: nowrap;
 }
-#results-table-container table td:last-child {
-  font-size: 0.85em;
-  white-space: nowrap;
-}
+/* Open/closed marker trailing an issue link inside a fail cell. */
+.issue-status { font-weight: 600; }
+.issue-open { color: #cf222e; }    /* red: issue still open */
+.issue-closed { color: #1a7f37; }  /* green: issue resolved */
 </style>
 
 <div id="results-table-container" markdown="1">
 
-| **Date (UTC)** | [cxl/next](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=next) | [cxl/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=fixes) | [nvdimm/next](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=for-next) | [nvdimm/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=fixes) | [linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/log/?h=master) | Issues |
-|----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
-| **Test Scope** | cxl | cxl | nvdimm/dax | nvdimm/dax | cxl/nvdimm/dax | |
-|----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|-------|
-| 2026-07-23 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29982577835) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29982534124) [1] | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29984098811) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29984101349) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29984760381) | [#5](https://github.com/pmem/ndctl-test-runner/issues/5) (open) [#6](https://github.com/pmem/ndctl-test-runner/issues/6) (open) |
-| 2026-07-22 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893941182) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893923480) [1] | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895497563) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895502194) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29896311408) | [#4](https://github.com/pmem/ndctl-test-runner/issues/4) (open) |
-| 2026-07-21 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29806645313) |  |
-| 2026-07-20 | — | — | — | — | — |  |
-| 2026-07-19 | — | — | — | — | — |  |
-| 2026-07-18 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29633036804) |  |
-| 2026-07-17 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29559107313) |  |
-| 2026-07-16 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29475769112) |  |
-| 2026-07-15 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29390783417) | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29391996749) | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29393066263) |  |
-| 2026-07-14 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29310057171) |  |
-| 2026-07-13 | — | — | — | — | — |  |
-| 2026-07-12 | — | — | — | — | — |  |
-| 2026-07-11 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29142206208) |  |
-| 2026-07-10 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29076513361) |  |
-| 2026-07-09 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29001471992) |  |
-| 2026-07-08 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28921970923) |  |
-| 2026-07-07 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28846216787) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28849053973) |  |
-| 2026-07-06 | — | — | — | — | — |  |
-| 2026-07-05 | — | — | — | — | — |  |
-| 2026-07-04 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28697941040) |  |
-| 2026-07-03 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28643783443) |  |
-| 2026-07-02 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28571510815) |  |
-| 2026-07-01 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28499051900) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28498993831) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28500528013) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28500527462) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28502658828) |  |
-| 2026-06-30 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28425202239) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28425159745) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28426394727) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28426406992) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28428319035) |  |
-| 2026-06-29 | — | — | — | — | — |  |
-| 2026-06-28 | — | — | — | — | — |  |
-| 2026-06-27 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28281549308) |  |
-| 2026-06-26 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28224333608) |  |
-| 2026-06-25 | — | — | — | — | — |  |
-| 2026-06-24 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28082527359) |  |
-| 2026-06-23 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28010093488) |  |
-| 2026-06-22 | — | — | — | — | — |  |
-| 2026-06-21 | — | — | — | — | — |  |
-| 2026-06-20 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27864520263) |  |
-| 2026-06-19 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27815885324) |  |
-| 2026-06-18 | — | — | — | — | — |  |
-| 2026-06-17 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27677266901) |  |
-| 2026-06-16 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27607107655) |  |
-| 2026-06-15 | — | — | — | — | — |  |
-| 2026-06-14 | — | — | — | — | — |  |
-| 2026-06-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27459194897) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27460550241) |  |
-| 2026-06-12 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27403501332) |  |
-| 2026-06-11 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27330195504) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27333929613) |  |
-| 2026-06-10 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27258400633) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27261843802) |  |
-| 2026-06-09 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27191093219) |  |
-| 2026-06-08 | — | — | — | — | — |  |
-| 2026-06-07 | — | — | — | — | — |  |
-| 2026-06-06 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27055315036) |  |
-| 2026-06-05 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26999954182) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27002895626) |  |
-| 2026-06-04 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26939366068) |  |
-| 2026-06-03 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26869694859) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26869637052) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26872870554) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26872881945) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26873780836) |  |
-| 2026-06-02 | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26806753932) | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26807399522) |  |
-| 2026-06-01 | — | — | — | — | — |  |
-| 2026-05-31 | — | — | — | — | — |  |
-| 2026-05-30 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26676264768) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26677074034) |  |
-| 2026-05-29 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26622175533) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26624886318) |  |
-| 2026-05-28 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26561728079) |  |
-| 2026-05-27 | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26495278088) | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26498373027) |  |
-| 2026-05-25 | — | — | — | — | — |  |
-| 2026-05-24 | — | — | — | — | — |  |
-| 2026-05-23 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26325734734) |  |
-| 2026-05-22 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26272210334) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26274726335) |  |
-| 2026-05-21 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26212404930) |  |
-| 2026-05-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26145540758) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26145530130) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26146580460) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26146583556) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26148225653) |  |
-| 2026-05-19 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26083062048) |  |
-| 2026-05-18 | — | — | — | — | — |  |
-| 2026-05-17 | — | — | — | — | — |  |
-| 2026-05-16 | — | — | — | — | — |  |
-| 2026-05-15 | — | — | — | — | — |  |
-| 2026-05-14 | — | — | — | — | — |  |
-| 2026-05-13 | — | — | — | — | — |  |
-| 2026-05-12 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25716061910) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25716046263) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25717207199) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25717215091) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25717601830) |  |
-| 2026-05-11 | — | — | — | — | — |  |
-| 2026-05-10 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25621805550) |  |
-| 2026-05-09 | — | — | — | — | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25593714112) | [#3](https://github.com/pmem/ndctl-test-runner/issues/3) (closed) |
-| 2026-05-08 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25539331276) |  |
-| 2026-05-07 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25479736528) |  |
-| 2026-05-06 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25419834190) |  |
-| 2026-05-05 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25356936167) |  |
-| 2026-05-04 | — | — | — | — | — |  |
-| 2026-05-03 | — | — | — | — | — |  |
-| 2026-05-02 | — | — | — | — | — |  |
-| 2026-05-01 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25202347015) |  |
-| 2026-04-30 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25147575656) |  |
-| 2026-04-29 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25091032041) |  |
-| 2026-04-28 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25034144009) |  |
-| 2026-04-27 | — | — | — | — | — |  |
-| 2026-04-26 | — | — | — | — | — |  |
-| 2026-04-25 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24921958625) |  |
-| 2026-04-24 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24871982445) |  |
-| 2026-04-23 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24816367663) |  |
-| 2026-04-22 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24759704519) |  |
-| 2026-04-21 | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24703524511) | — | — |  |
-| 2026-04-21 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700726311) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700728870) [2] | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700730266) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700731725) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700733076) | [#2](https://github.com/pmem/ndctl-test-runner/issues/2) (closed) |
-| 2026-04-20 | — | — | — | — | — |  |
-| 2026-04-19 | — | — | — | — | — |  |
-| 2026-04-18 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24597877527) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598073311) [2] | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598121074) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598096412) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598099329) |  |
-| 2026-04-16 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497568304) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24527494181) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497288926) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498382832) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498495818) | [#1](https://github.com/pmem/ndctl-test-runner/issues/1) (closed) |
+| **Date (UTC)** | [cxl/next](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=next) | [cxl/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/cxl/cxl.git/log/?h=fixes) | [nvdimm/next](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=for-next) | [nvdimm/fixes](https://git.kernel.org/pub/scm/linux/kernel/git/nvdimm/nvdimm.git/log/?h=fixes) | [linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/log/?h=master) |
+|----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|
+| **Test Scope** | cxl | cxl | nvdimm/dax | nvdimm/dax | cxl/nvdimm/dax |
+|----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|
+| 2026-07-23 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29982577835) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29982534124) [1] | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29984098811) [#5](https://github.com/pmem/ndctl-test-runner/issues/5) <span class="issue-status issue-closed">✓</span> | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29984101349) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29984760381) [#6](https://github.com/pmem/ndctl-test-runner/issues/6) <span class="issue-status issue-closed">✓</span> |
+| 2026-07-22 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893941182) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29893923480) [1] | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895497563) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29895502194) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29896311408) [#4](https://github.com/pmem/ndctl-test-runner/issues/4) <span class="issue-status issue-open">●</span> |
+| 2026-07-21 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29806645313) |
+| 2026-07-20 | — | — | — | — | — |
+| 2026-07-19 | — | — | — | — | — |
+| 2026-07-18 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29633036804) |
+| 2026-07-17 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29559107313) |
+| 2026-07-16 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29475769112) |
+| 2026-07-15 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29390783417) | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29391996749) | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29393066263) |
+| 2026-07-14 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29310057171) |
+| 2026-07-13 | — | — | — | — | — |
+| 2026-07-12 | — | — | — | — | — |
+| 2026-07-11 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29142206208) |
+| 2026-07-10 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29076513361) |
+| 2026-07-09 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29001471992) |
+| 2026-07-08 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28921970923) |
+| 2026-07-07 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28846216787) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28849053973) |
+| 2026-07-06 | — | — | — | — | — |
+| 2026-07-05 | — | — | — | — | — |
+| 2026-07-04 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28697941040) |
+| 2026-07-03 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28643783443) |
+| 2026-07-02 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28571510815) |
+| 2026-07-01 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28499051900) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28498993831) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28500528013) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28500527462) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28502658828) |
+| 2026-06-30 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28425202239) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28425159745) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28426394727) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28426406992) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28428319035) |
+| 2026-06-29 | — | — | — | — | — |
+| 2026-06-28 | — | — | — | — | — |
+| 2026-06-27 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28281549308) |
+| 2026-06-26 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28224333608) |
+| 2026-06-25 | — | — | — | — | — |
+| 2026-06-24 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28082527359) |
+| 2026-06-23 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28010093488) |
+| 2026-06-22 | — | — | — | — | — |
+| 2026-06-21 | — | — | — | — | — |
+| 2026-06-20 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27864520263) |
+| 2026-06-19 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27815885324) |
+| 2026-06-18 | — | — | — | — | — |
+| 2026-06-17 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27677266901) |
+| 2026-06-16 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27607107655) |
+| 2026-06-15 | — | — | — | — | — |
+| 2026-06-14 | — | — | — | — | — |
+| 2026-06-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27459194897) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27460550241) |
+| 2026-06-12 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27403501332) |
+| 2026-06-11 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27330195504) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27333929613) |
+| 2026-06-10 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27258400633) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27261843802) |
+| 2026-06-09 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27191093219) |
+| 2026-06-08 | — | — | — | — | — |
+| 2026-06-07 | — | — | — | — | — |
+| 2026-06-06 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27055315036) |
+| 2026-06-05 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26999954182) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27002895626) |
+| 2026-06-04 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26939366068) |
+| 2026-06-03 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26869694859) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26869637052) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26872870554) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26872881945) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26873780836) |
+| 2026-06-02 | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26806753932) | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26807399522) |
+| 2026-06-01 | — | — | — | — | — |
+| 2026-05-31 | — | — | — | — | — |
+| 2026-05-30 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26676264768) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26677074034) |
+| 2026-05-29 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26622175533) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26624886318) |
+| 2026-05-28 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26561728079) |
+| 2026-05-27 | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26495278088) | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26498373027) |
+| 2026-05-25 | — | — | — | — | — |
+| 2026-05-24 | — | — | — | — | — |
+| 2026-05-23 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26325734734) |
+| 2026-05-22 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26272210334) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26274726335) |
+| 2026-05-21 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26212404930) |
+| 2026-05-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26145540758) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26145530130) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26146580460) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26146583556) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26148225653) |
+| 2026-05-19 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26083062048) |
+| 2026-05-18 | — | — | — | — | — |
+| 2026-05-17 | — | — | — | — | — |
+| 2026-05-16 | — | — | — | — | — |
+| 2026-05-15 | — | — | — | — | — |
+| 2026-05-14 | — | — | — | — | — |
+| 2026-05-13 | — | — | — | — | — |
+| 2026-05-12 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25716061910) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25716046263) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25717207199) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25717215091) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25717601830) |
+| 2026-05-11 | — | — | — | — | — |
+| 2026-05-10 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25621805550) |
+| 2026-05-09 | — | — | — | — | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25593714112) [#3](https://github.com/pmem/ndctl-test-runner/issues/3) <span class="issue-status issue-closed">✓</span> |
+| 2026-05-08 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25539331276) |
+| 2026-05-07 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25479736528) |
+| 2026-05-06 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25419834190) |
+| 2026-05-05 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25356936167) |
+| 2026-05-04 | — | — | — | — | — |
+| 2026-05-03 | — | — | — | — | — |
+| 2026-05-02 | — | — | — | — | — |
+| 2026-05-01 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25202347015) |
+| 2026-04-30 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25147575656) |
+| 2026-04-29 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25091032041) |
+| 2026-04-28 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25034144009) |
+| 2026-04-27 | — | — | — | — | — |
+| 2026-04-26 | — | — | — | — | — |
+| 2026-04-25 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24921958625) |
+| 2026-04-24 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24871982445) |
+| 2026-04-23 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24816367663) |
+| 2026-04-22 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24759704519) |
+| 2026-04-21 | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24703524511) | — | — |
+| 2026-04-21 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700726311) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700728870) [2] | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700730266) [#2](https://github.com/pmem/ndctl-test-runner/issues/2) <span class="issue-status issue-closed">✓</span> | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700731725) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24700733076) |
+| 2026-04-20 | — | — | — | — | — |
+| 2026-04-19 | — | — | — | — | — |
+| 2026-04-18 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24597877527) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598073311) [2] | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598121074) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598096412) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598099329) |
+| 2026-04-16 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497568304) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24527494181) [#1](https://github.com/pmem/ndctl-test-runner/issues/1) <span class="issue-status issue-closed">✓</span> | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497288926) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498382832) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498495818) |
 
 <div id="pagination-controls" style="margin: 20px 0; text-align: center; display: flex; justify-content: center; align-items: center;">
   <button id="prev-btn" style="padding: 5px 10px; margin: 0 5px; cursor: pointer; font-size: 0.85em;">← prev</button>
@@ -235,18 +237,20 @@ Daily automated test runs against active development branches using the [ndctl p
 </script>
 
 <script>
-// Live open/closed status for issue links in the Issues column.
-// The committed markdown carries the last-known status word ("(open)"/"(closed)"),
-// refreshed daily by the nightly-results workflow. This layer only re-checks the
-// issues still marked "(open)" so a freshly-closed issue flips right away, without
-// waiting for the next daily run. Closed issues are never re-queried, and answers
-// are cached in localStorage (~10 min) to stay well under GitHub's unauthenticated
-// rate limit (60 req/hr/IP). Degrades gracefully: if JS is off or the API is
-// unreachable, the committed word is shown as-is.
+// Live open/closed status for the issue marker trailing a fail cell.
+// The committed markdown carries the last-known status as a glyph span
+// (<span class="issue-status issue-open">●</span> / issue-closed ✓), refreshed
+// daily by the nightly-results workflow. This layer only re-checks markers still
+// showing "open" so a freshly-closed issue flips right away, without waiting for
+// the next daily run. Closed markers are never re-queried, and answers are cached
+// in localStorage (~10 min) to stay well under GitHub's unauthenticated rate limit
+// (60 req/hr/IP). Degrades gracefully: if JS is off or the API is unreachable, the
+// committed glyph is shown as-is.
 (function() {
   const REPO = 'pmem/ndctl-test-runner';
   const TTL_MS = 10 * 60 * 1000;  // cache lifetime
   const ISSUE_RE = new RegExp('/' + REPO.replace('/', '\\/') + '/issues/(\\d+)$');
+  const CLOSED_GLYPH = '✓';  // ✓
 
   function cacheGet(n) {
     try {
@@ -262,42 +266,42 @@ Daily automated test runs against active development branches using the [ndctl p
     } catch (e) { /* ignore quota/availability errors */ }
   }
 
-  // Rewrite the "(open)"/"(closed)" word that trails an issue link within its cell.
-  function applyState(anchor, state) {
-    const cell = anchor.closest('td');
-    if (!cell) return;
-    cell.innerHTML = cell.innerHTML.replace(
-      /\((open|closed)\)/,
-      '(' + state + ')'
-    );
+  // Flip a single marker span to closed. Touches only this element, so markers
+  // in other cells (or the same row) are never disturbed.
+  function markClosed(span) {
+    span.classList.remove('issue-open');
+    span.classList.add('issue-closed');
+    span.textContent = CLOSED_GLYPH;
   }
 
-  async function refresh(n, anchor) {
+  async function refresh(n, span) {
     const cached = cacheGet(n);
-    if (cached) { applyState(anchor, cached); return; }
+    if (cached) { if (cached === 'closed') markClosed(span); return; }
     try {
       const resp = await fetch(
         'https://api.github.com/repos/' + REPO + '/issues/' + n,
         { headers: { 'Accept': 'application/vnd.github+json' } }
       );
-      if (!resp.ok) return;  // rate-limited or missing: keep committed word
+      if (!resp.ok) return;  // rate-limited or missing: keep committed glyph
       const data = await resp.json();
       if (data && data.state) {
         cacheSet(n, data.state);
-        applyState(anchor, data.state);
+        if (data.state === 'closed') markClosed(span);
       }
-    } catch (e) { /* offline etc: keep committed word */ }
+    } catch (e) { /* offline etc: keep committed glyph */ }
   }
 
   function init() {
-    const anchors = Array.from(document.querySelectorAll('a'))
-      .filter(a => ISSUE_RE.test(a.getAttribute('href') || ''));
-    anchors.forEach(a => {
-      const cell = a.closest('td');
-      // Only re-check issues the committed file still marks "(open)".
-      if (!cell || !/\(open\)/.test(cell.textContent)) return;
-      const n = a.getAttribute('href').match(ISSUE_RE)[1];
-      refresh(n, a);
+    // Only re-check markers the committed file still shows as open.
+    const spans = Array.from(document.querySelectorAll('span.issue-status.issue-open'));
+    spans.forEach(span => {
+      const cell = span.closest('td');
+      if (!cell) return;
+      const anchor = Array.from(cell.querySelectorAll('a'))
+        .find(a => ISSUE_RE.test(a.getAttribute('href') || ''));
+      if (!anchor) return;
+      const n = anchor.getAttribute('href').match(ISSUE_RE)[1];
+      refresh(n, span);
     });
   }
 
