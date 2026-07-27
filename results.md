@@ -8,6 +8,7 @@ All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) usin
 
 | Kernel Tag | Date Tagged | Date Tested | Result | Attempts |
 |------------|-------------|-------------|--------|----------|
+| v7.2-rc5 | 2026-07-26 | 2026-07-27 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/30269939594) [1] | 1 |
 | v7.2-rc4 | 2026-07-19 | 2026-07-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29742204649) [1] | 1 |
 | v7.2-rc3 | 2026-07-12 | 2026-07-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29250849094) [1] | 1 |
 | v7.2-rc2 | 2026-07-05 | 2026-07-06 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28797344765) [1] | 1 |
