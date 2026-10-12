@@ -55,6 +55,7 @@ Daily automated test runs against active development branches using the [ndctl p
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|
 | **Test Scope** | cxl | cxl | nvdimm/dax | nvdimm/dax | cxl/nvdimm/dax |
 |----------|:--------------------:|:----------------------:|:-------------------------------------:|:------------------------------------:|:-----------------------------------:|
+| 2026-10-12 | — | — | — | — | — |
 | 2026-10-11 | — | — | — | — | — |
 | 2026-10-10 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/38038505427) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/38043884486) |
 | 2026-10-09 | — | — | — | — | — |
@@ -67,7 +68,7 @@ Daily automated test runs against active development branches using the [ndctl p
 | 2026-10-02 | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36990909898) | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36993394091) |
 | 2026-10-01 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36849400983) |
 | 2026-09-30 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36691183575) | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36699777575) |
-| 2026-09-29 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36544126489) | — | — | — | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36553789274) [#21](https://github.com/pmem/ndctl-test-runner/issues/21) <span class="issue-status issue-open">●</span> |
+| 2026-09-29 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36544126489) | — | — | — | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36553789274) [#21](https://github.com/pmem/ndctl-test-runner/issues/21) <span class="issue-status issue-closed">✓</span> |
 | 2026-09-28 | — | — | — | — | — |
 | 2026-09-27 | — | — | — | — | — |
 | 2026-09-26 | — | — | — | — | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36230991230) |
