@@ -6,6 +6,8 @@ All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) usin
 - <span style="color:green">pass</span> = all tests passed (pass [N] means N tests were skipped)
 - <span style="color:red">fail</span> = one or more failures occurred (test failure, build failure, or workflow/infrastructure failure); a trailing [#N] links its tracking issue, <span class="issue-status issue-open">●</span> open, <span class="issue-status issue-closed">✓</span> resolved
 
+<div id="mainline-table-container" markdown="1">
+
 | Kernel Tag | Date Tagged | Date Tested | Result | Attempts |
 |------------|-------------|-------------|--------|----------|
 | v7.3 | 2026-10-18 | 2026-10-19 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/39293746998) | 1 |
@@ -33,6 +35,14 @@ All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) usin
 | v7.1-rc2 | 2026-05-03 | 2026-05-04 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25317995626) | 1 |
 | v7.1-rc1 | 2026-04-26 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082127859) | 1 |
 | v7.0 | 2026-04-12 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082119712) [2] | 1 |
+
+<div class="pagination-controls" style="margin: 20px 0; text-align: center; display: flex; justify-content: center; align-items: center;">
+  <button class="prev-btn" style="padding: 5px 10px; margin: 0 5px; cursor: pointer; font-size: 0.85em;">← prev</button>
+  <span class="page-info" style="margin: 0 10px; font-size: 0.9em;"></span>
+  <button class="next-btn" style="padding: 5px 10px; margin: 0 5px; cursor: pointer; font-size: 0.85em;">next →</button>
+</div>
+
+</div>
 
 ## Daily Branch Results
 
@@ -244,87 +254,64 @@ Daily automated test runs against active development branches using the [ndctl p
 | 2026-04-18 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24597877527) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598073311) [2] | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598121074) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598096412) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24598099329) |
 | 2026-04-16 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497568304) | [<span style="color:red">fail</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24527494181) [#1](https://github.com/pmem/ndctl-test-runner/issues/1) <span class="issue-status issue-closed">✓</span> | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24497288926) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498382832) | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/24498495818) |
 
-<div id="pagination-controls" style="margin: 20px 0; text-align: center; display: flex; justify-content: center; align-items: center;">
-  <button id="prev-btn" style="padding: 5px 10px; margin: 0 5px; cursor: pointer; font-size: 0.85em;">← prev</button>
-  <span id="page-info" style="margin: 0 10px; font-size: 0.9em;"></span>
-  <button id="next-btn" style="padding: 5px 10px; margin: 0 5px; cursor: pointer; font-size: 0.85em;">next →</button>
+<div class="pagination-controls" style="margin: 20px 0; text-align: center; display: flex; justify-content: center; align-items: center;">
+  <button class="prev-btn" style="padding: 5px 10px; margin: 0 5px; cursor: pointer; font-size: 0.85em;">← prev</button>
+  <span class="page-info" style="margin: 0 10px; font-size: 0.9em;"></span>
+  <button class="next-btn" style="padding: 5px 10px; margin: 0 5px; cursor: pointer; font-size: 0.85em;">next →</button>
 </div>
 
 </div>
 
 <script>
+// Client-side pagination. Each container holds a markdown table plus a
+// .pagination-controls block; controls hide when one page is enough.
 (function() {
-  const ROWS_PER_PAGE = 30;
-  const HEADER_ROWS = 2;  // Date header <tr> + Test Scope <tr>
-                          // (markdown |---| separators are not rendered as rows)
-  let currentPage = 1;
-  let allRows = [];
-  
-  function init() {
-    console.log('Pagination init starting...');
-    
-    const container = document.getElementById('results-table-container');
-    console.log('Container found:', !!container);
+  function paginate(containerId, rowsPerPage, headerRows) {
+    const container = document.getElementById(containerId);
     if (!container) return;
-    
     const table = container.querySelector('table');
-    console.log('Table found:', !!table);
-    if (!table) return;
-    
-    // Get all rows from table (not just tbody)
-    const rows = Array.from(table.querySelectorAll('tr'));
-    console.log('Total rows in table:', rows.length);
-    allRows = rows.slice(HEADER_ROWS);
-    console.log('Data rows (after skipping headers):', allRows.length);
-    console.log('ROWS_PER_PAGE:', ROWS_PER_PAGE);
-    console.log('Should show pagination?', allRows.length > ROWS_PER_PAGE);
-    
-    if (allRows.length <= ROWS_PER_PAGE) {
-      // Hide pagination if not needed
-      console.log('Hiding pagination - not enough rows');
-      document.getElementById('pagination-controls').style.display = 'none';
+    const controls = container.querySelector('.pagination-controls');
+    if (!table || !controls) return;
+
+    // Get all rows from table (not just tbody); markdown |---| separators
+    // are not rendered as rows.
+    const allRows = Array.from(table.querySelectorAll('tr')).slice(headerRows);
+    const totalPages = Math.ceil(allRows.length / rowsPerPage);
+    const prevBtn = controls.querySelector('.prev-btn');
+    const nextBtn = controls.querySelector('.next-btn');
+    const pageInfo = controls.querySelector('.page-info');
+    let currentPage = 1;
+
+    if (totalPages <= 1) {
+      controls.style.display = 'none';
       return;
     }
-    
-    console.log('Setting up pagination...');
+
+    function showPage(page) {
+      const start = (page - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      allRows.forEach((row, index) => {
+        row.style.display = (index >= start && index < end) ? '' : 'none';
+      });
+      prevBtn.disabled = page === 1;
+      nextBtn.disabled = page === totalPages;
+      pageInfo.textContent = `Page ${page} of ${totalPages}`;
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) showPage(--currentPage);
+    });
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) showPage(++currentPage);
+    });
     showPage(1);
-    updateButtons();
-    
-    document.getElementById('prev-btn').addEventListener('click', () => {
-      if (currentPage > 1) {
-        currentPage--;
-        showPage(currentPage);
-        updateButtons();
-      }
-    });
-    
-    document.getElementById('next-btn').addEventListener('click', () => {
-      const totalPages = Math.ceil(allRows.length / ROWS_PER_PAGE);
-      if (currentPage < totalPages) {
-        currentPage++;
-        showPage(currentPage);
-        updateButtons();
-      }
-    });
   }
-  
-  function showPage(page) {
-    const start = (page - 1) * ROWS_PER_PAGE;
-    const end = start + ROWS_PER_PAGE;
-    
-    allRows.forEach((row, index) => {
-      row.style.display = (index >= start && index < end) ? '' : 'none';
-    });
+
+  function init() {
+    paginate('mainline-table-container', 10, 1);  // Kernel Tag header <tr>
+    paginate('results-table-container', 20, 2);   // Date header + Test Scope <tr>
   }
-  
-  function updateButtons() {
-    const totalPages = Math.ceil(allRows.length / ROWS_PER_PAGE);
-    
-    document.getElementById('prev-btn').disabled = currentPage === 1;
-    document.getElementById('next-btn').disabled = currentPage === totalPages;
-    document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
-  }
-  
+
   // Run after page loads
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
