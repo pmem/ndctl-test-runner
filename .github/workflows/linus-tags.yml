@@ -34,15 +34,37 @@ jobs:
 
           LINUS_REPO="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git"
 
+          # Retry to ride out transient server-side clone aborts from
+          # git.kernel.org. See main.yml "checkout ndctl".
+          clone_retry() {
+            local dir=$1; shift
+            local attempts=3 delay=15 i
+            for (( i=1; i<=attempts; i++ )); do
+              rm -rf "$dir"
+              if git "$@"; then
+                return 0
+              fi
+              echo "::warning::clone of '$dir' failed (attempt $i/$attempts)"
+              if (( i < attempts )); then
+                echo "retrying in ${delay}s..."
+                sleep "$delay"
+                delay=$(( delay * 2 ))
+              fi
+            done
+            echo "::error::clone of '$dir' failed after $attempts attempts"
+            return 1
+          }
+
+          # One bare clone serves both tag detection and the tag date lookup.
+          echo "Fetching tags from $LINUS_REPO"
+          clone_retry /tmp/linus-repo clone --bare --filter=blob:none "$LINUS_REPO" /tmp/linus-repo
+
           if [[ -n "${{ inputs.kernel_tag }}" ]]; then
             # Use explicit tag from manual trigger
             TARGET_TAG="${{ inputs.kernel_tag }}"
             echo "Using explicit tag: $TARGET_TAG"
           else
             # Auto-detect latest tag matching v[0-9]*
-            echo "Fetching tags from $LINUS_REPO"
-            git clone --bare --filter=blob:none "$LINUS_REPO" /tmp/linus-repo
-
             # Get latest tag - prefer a final release over an RC of the same version.
             # sort -V puts v7.1-rc7 after v7.1 (suffix > no suffix), so we must
             # compare explicitly: use the latest non-RC unless the latest RC is for
@@ -76,8 +98,7 @@ jobs:
           fi
 
           # Get tag date
-          git clone --bare --filter=blob:none "$LINUS_REPO" /tmp/linus-repo-date 2>/dev/null || true
-          TAG_DATE=$(git -C /tmp/linus-repo-date for-each-ref "refs/tags/$TARGET_TAG" \
+          TAG_DATE=$(git -C /tmp/linus-repo for-each-ref "refs/tags/$TARGET_TAG" \
             --format='%(creatordate:short)')
 
           if [[ -z "$TAG_DATE" ]]; then
