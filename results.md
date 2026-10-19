@@ -52,6 +52,13 @@ Daily automated test runs against active development branches using the [ndctl p
 - `—` = testing skipped, both kernel and ndctl branches unchanged since last successful run
 
 <style>
+/* Shrink each table container to its table so the pagination controls
+   center under the table rather than across the page. */
+#mainline-table-container,
+#results-table-container {
+  width: fit-content;
+  max-width: 100%;
+}
 #results-table-container table td:first-child {
   white-space: nowrap;
 }
