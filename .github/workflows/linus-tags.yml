@@ -222,15 +222,7 @@ jobs:
           if grep -q "^| $TARGET_TAG |" results.md; then
             echo "Updating existing row for $TARGET_TAG (rerun)"
 
-            # Extract current attempts count
-            CURRENT_LINE=$(grep "^| $TARGET_TAG |" results.md)
-            CURRENT_ATTEMPTS=$(echo "$CURRENT_LINE" | awk -F'|' '{print $6}' | xargs)
-
-            # Increment attempts
-            NEW_ATTEMPTS=$((CURRENT_ATTEMPTS + 1))
-
-            # Build new row
-            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT | $NEW_ATTEMPTS |"
+            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT |"
 
             # Replace the row using Python
             python3 - "$TARGET_TAG" "$NEW_ROW" << 'PYEOF'
@@ -254,7 +246,7 @@ jobs:
             echo "Adding new row for $TARGET_TAG (first test)"
 
             # First test of this tag
-            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT | 1 |"
+            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT |"
 
             # Insert new row in the Linus Mainline Release Tags section
             python3 - "$NEW_ROW" "$TARGET_TAG" << 'PYEOF'
