@@ -8,33 +8,33 @@ All Unit Tests are run against Linus mainline release tags (vX.Y, vX.Y-rcN) usin
 
 <div id="mainline-table-container" markdown="1">
 
-| Kernel Tag | Date Tagged | Date Tested | Result | Attempts |
-|------------|-------------|-------------|--------|----------|
-| v7.3 | 2026-10-18 | 2026-10-19 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/39293746998) | 1 |
-| v7.3-rc7 | 2026-10-11 | 2026-10-12 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/38300227616) | 1 |
-| v7.3-rc6 | 2026-10-04 | 2026-10-07 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/37362447677) | 1 |
-| v7.3-rc5 | 2026-09-27 | 2026-09-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36463338794) | 1 |
-| v7.3-rc4 | 2026-09-20 | 2026-09-21 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/35625877970) | 1 |
-| v7.3-rc3 | 2026-09-13 | 2026-09-14 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/34868272996) | 1 |
-| v7.3-rc2 | 2026-09-06 | 2026-09-07 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/34140568336) | 1 |
-| v7.3-rc1 | 2026-08-30 | 2026-09-01 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/33536661621) | 1 |
-| v7.2 | 2026-08-16 | 2026-08-17 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/32021959228) [1] | 1 |
-| v7.2-rc7 | 2026-08-09 | 2026-08-10 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/31383585563) [1] | 1 |
-| v7.2-rc6 | 2026-08-02 | 2026-08-03 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/30817529262) [1] | 1 |
-| v7.2-rc5 | 2026-07-26 | 2026-07-27 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/30269939594) [1] | 1 |
-| v7.2-rc4 | 2026-07-19 | 2026-07-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29742204649) [1] | 1 |
-| v7.2-rc3 | 2026-07-12 | 2026-07-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29250849094) [1] | 1 |
-| v7.2-rc2 | 2026-07-05 | 2026-07-06 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28797344765) [1] | 1 |
-| v7.2-rc1 | 2026-06-28 | 2026-06-29 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28379508764) | 1 |
-| v7.1 | 2026-06-14 | 2026-06-15 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27573852969) | 1 |
-| v7.1-rc7 | 2026-06-07 | 2026-06-08 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27144818896) | 1 |
-| v7.1-rc6 | 2026-05-31 | 2026-06-01 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26767313370) | 1 |
-| v7.1-rc5 | 2026-05-24 | 2026-05-25 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26403585961) | 1 |
-| v7.1-rc4 | 2026-05-17 | 2026-05-18 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26038371655) | 1 |
-| v7.1-rc3 | 2026-05-10 | 2026-05-11 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25672722173) | 1 |
-| v7.1-rc2 | 2026-05-03 | 2026-05-04 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25317995626) | 1 |
-| v7.1-rc1 | 2026-04-26 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082127859) | 1 |
-| v7.0 | 2026-04-12 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082119712) [2] | 1 |
+| Kernel Tag | Date Tagged | Date Tested | Result |
+|------------|-------------|-------------|--------|
+| v7.3 | 2026-10-18 | 2026-10-19 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/39293746998) |
+| v7.3-rc7 | 2026-10-11 | 2026-10-12 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/38300227616) |
+| v7.3-rc6 | 2026-10-04 | 2026-10-07 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/37362447677) |
+| v7.3-rc5 | 2026-09-27 | 2026-09-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/36463338794) |
+| v7.3-rc4 | 2026-09-20 | 2026-09-21 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/35625877970) |
+| v7.3-rc3 | 2026-09-13 | 2026-09-14 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/34868272996) |
+| v7.3-rc2 | 2026-09-06 | 2026-09-07 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/34140568336) |
+| v7.3-rc1 | 2026-08-30 | 2026-09-01 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/33536661621) |
+| v7.2 | 2026-08-16 | 2026-08-17 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/32021959228) [1] |
+| v7.2-rc7 | 2026-08-09 | 2026-08-10 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/31383585563) [1] |
+| v7.2-rc6 | 2026-08-02 | 2026-08-03 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/30817529262) [1] |
+| v7.2-rc5 | 2026-07-26 | 2026-07-27 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/30269939594) [1] |
+| v7.2-rc4 | 2026-07-19 | 2026-07-20 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29742204649) [1] |
+| v7.2-rc3 | 2026-07-12 | 2026-07-13 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/29250849094) [1] |
+| v7.2-rc2 | 2026-07-05 | 2026-07-06 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28797344765) [1] |
+| v7.2-rc1 | 2026-06-28 | 2026-06-29 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/28379508764) |
+| v7.1 | 2026-06-14 | 2026-06-15 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27573852969) |
+| v7.1-rc7 | 2026-06-07 | 2026-06-08 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/27144818896) |
+| v7.1-rc6 | 2026-05-31 | 2026-06-01 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26767313370) |
+| v7.1-rc5 | 2026-05-24 | 2026-05-25 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26403585961) |
+| v7.1-rc4 | 2026-05-17 | 2026-05-18 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/26038371655) |
+| v7.1-rc3 | 2026-05-10 | 2026-05-11 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25672722173) |
+| v7.1-rc2 | 2026-05-03 | 2026-05-04 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25317995626) |
+| v7.1-rc1 | 2026-04-26 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082127859) |
+| v7.0 | 2026-04-12 | 2026-04-28 | [<span style="color:green">pass</span>](https://github.com/pmem/ndctl-test-runner/actions/runs/25082119712) [2] |
 
 <div class="pagination-controls" style="margin: 20px 0; text-align: center; display: flex; justify-content: center; align-items: center;">
   <button class="prev-btn" style="padding: 5px 10px; margin: 0 5px; cursor: pointer; font-size: 0.85em;">← prev</button>
