@@ -4,7 +4,7 @@ name: linus mainline tags
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: '23 10 * * 1'  # Monday 10:23 UTC
+    - cron: '07 3 * * 1'  # Monday 03:07 UTC (Sunday 7:07pm PST / 8:07pm PDT)
   workflow_dispatch:
     inputs:
       kernel_tag:
