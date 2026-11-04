@@ -84,17 +84,19 @@ jobs:
 
             if [[ "$test_conclusion" == "success" ]]; then
               # Download artifacts and count skipped tests
-              local skip_count=0
-              local artifact_name="${wf%.yml}"
-              artifact_name="logs-${artifact_name#nightly-}"
+              # The artifact is named logs-<suite>-<branch> by main.yml, which
+              # doesn't map to the workflow filename, so fetch the run's
+              # artifacts without a name filter and locate rq_0.log.
+              local skip_count=0 logdir="/tmp/artifact-$run_id" logfile=""
 
-              if gh run download "$run_id" -n "$artifact_name" -D "/tmp/artifact-$run_id" 2>/dev/null; then
+              if gh run download "$run_id" -D "$logdir" 2>/dev/null; then
+                logfile=$(find "$logdir" -name rq_0.log 2>/dev/null | head -1)
                 # Extract just the digits; the summary line may carry a
                 # trailing CR/whitespace that would defeat awk '{print $NF}'.
-                skip_count=$(grep -oE "Skipped:[[:space:]]+[0-9]+" "/tmp/artifact-$run_id/tmp/rq_0.log" 2>/dev/null \
+                [[ -n "$logfile" ]] && skip_count=$(grep -oE "Skipped:[[:space:]]+[0-9]+" "$logfile" 2>/dev/null \
                   | grep -oE "[0-9]+" | head -1)
-                rm -rf "/tmp/artifact-$run_id"
               fi
+              rm -rf "$logdir"
 
               if [[ -n "$skip_count" ]] && [[ "$skip_count" -gt 0 ]]; then
                 echo "[<span style=\"color:green\">pass</span>]($run_url) [$skip_count]"
