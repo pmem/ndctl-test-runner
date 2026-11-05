@@ -89,6 +89,7 @@ jobs:
     needs: [check, test, test-retry]
     if: |
       always() &&
+      github.event_name == 'schedule' &&
       (needs.test.result == 'success' || needs.test-retry.result == 'success')
     runs-on: ubuntu-latest
     steps:
