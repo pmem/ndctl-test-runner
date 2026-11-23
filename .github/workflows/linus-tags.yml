@@ -146,6 +146,9 @@ jobs:
 
   publish:
     needs: [detect, test]
+    # Publish failures too; the default success() condition would skip this
+    # job whenever the test fails.
+    if: ${{ !cancelled() && needs.detect.outputs.should_test == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
