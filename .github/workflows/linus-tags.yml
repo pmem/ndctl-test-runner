@@ -21,6 +21,8 @@ jobs:
       target_tag: ${{ steps.determine.outputs.target_tag }}
       tag_date: ${{ steps.determine.outputs.tag_date }}
       should_test: ${{ steps.check.outputs.should_test }}
+      ndctl_sha: ${{ steps.ndctl_sha.outputs.value }}
+      config_hash: ${{ steps.config_hash.outputs.value }}
     steps:
       - name: checkout gh-pages
         uses: actions/checkout@v4
@@ -110,26 +112,50 @@ jobs:
           echo "tag_date=$TAG_DATE" >> "$GITHUB_OUTPUT"
           echo "Tag: $TARGET_TAG (created $TAG_DATE)"
 
+      # Same dedup rule as the nightly workflows: skip only when this tag,
+      # ndctl pending HEAD, and the kernel config fragments have already
+      # passed together. A failed tag, or a change to ndctl or the config,
+      # gets retested. The marker is saved by the mark job on success only.
+      - name: checkout config fragments from main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _main
+          sparse-checkout: .github/workflows
+
+      - name: hash kernel config files
+        id: config_hash
+        run: |
+          hash=$(sha256sum _main/.github/workflows/*.cfg | awk '{print $1}' \
+            | sha256sum | awk '{print $1}')
+          echo "value=$hash" >> "$GITHUB_OUTPUT"
+
+      - name: fetch ndctl HEAD
+        id: ndctl_sha
+        run: |
+          sha=$(git ls-remote https://github.com/pmem/ndctl.git \
+            refs/heads/pending | awk '{print $1}')
+          echo "value=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: look up tested marker
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/.ndctl-tested
+          key: tested-linus-${{ steps.determine.outputs.target_tag }}-${{ steps.ndctl_sha.outputs.value }}-${{ steps.config_hash.outputs.value }}
+          lookup-only: true
+
       - name: check if already tested
         id: check
         run: |
-          set -euo pipefail
-
-          TARGET_TAG="${{ steps.determine.outputs.target_tag }}"
-
-          if [[ ! -f results.md ]]; then
-            echo "should_test=true" >> "$GITHUB_OUTPUT"
-            echo "results.md not found - will test"
-            exit 0
-          fi
-
-          # Search for tag in the Linus Mainline Release Tags table
-          if grep -q "^| $TARGET_TAG |" results.md; then
+          TAG="${{ steps.determine.outputs.target_tag }}"
+          NDCTL="${{ steps.ndctl_sha.outputs.value }}"
+          if [[ "${{ steps.cache.outputs.cache-hit }}" == "true" ]]; then
             echo "should_test=false" >> "$GITHUB_OUTPUT"
-            echo "Tag $TARGET_TAG already tested - skipping"
+            echo "$TAG already passed with ndctl $NDCTL and current config - skipping"
           else
             echo "should_test=true" >> "$GITHUB_OUTPUT"
-            echo "Tag $TARGET_TAG not yet tested - will test"
+            echo "$TAG not yet passed with ndctl $NDCTL and current config - will test"
           fi
 
   test:
@@ -330,3 +356,16 @@ jobs:
           git diff --cached --quiet || \
             git commit -m "results: linus ${{ needs.detect.outputs.target_tag }}" && \
             git push origin gh-pages
+
+  # Unlike the nightlies, manual runs here publish to the results table,
+  # so they mark too.
+  mark:
+    needs: [detect, test]
+    if: needs.test.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ needs.detect.outputs.target_tag }}" > /tmp/.ndctl-tested
+      - uses: actions/cache/save@v4
+        with:
+          path: /tmp/.ndctl-tested
+          key: tested-linus-${{ needs.detect.outputs.target_tag }}-${{ needs.detect.outputs.ndctl_sha }}-${{ needs.detect.outputs.config_hash }}
