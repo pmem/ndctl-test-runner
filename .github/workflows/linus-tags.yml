@@ -232,8 +232,6 @@ jobs:
 
           # On failure, open an issue with an auto-triaged signature and fold its
           # link + open marker into the Result cell: "[fail](run) [#N](issue) ●".
-          # The table shows only the latest attempt, so a passing rerun drops the
-          # marker (the issue itself remains on GitHub).
           if [[ "$TEST_CONCLUSION" != "success" ]]; then
             LOGDIR="/tmp/faillog-$RUN_ID"; LOGFILE=""
             if gh run download "$RUN_ID" -n "logs-all-$TARGET_TAG" -D "$LOGDIR" 2>/dev/null; then
@@ -247,38 +245,12 @@ jobs:
             [[ -n "$ISSUE_URL" ]] && RESULT="$RESULT [#${ISSUE_URL##*/}]($ISSUE_URL) <span class=\"issue-status issue-open\">●</span>"
           fi
 
-          # Check if row already exists (this is a rerun)
-          if grep -q "^| $TARGET_TAG |" results.md; then
-            echo "Updating existing row for $TARGET_TAG (rerun)"
+          # Every attempt gets its own row; a rerun never overwrites an earlier
+          # result, so a failure and its issue link stay in the history.
+          NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT |"
 
-            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT |"
-
-            # Replace the row using Python
-            python3 - "$TARGET_TAG" "$NEW_ROW" << 'PYEOF'
-          import sys
-          import re
-
-          target_tag = sys.argv[1]
-          new_row = sys.argv[2]
-
-          with open('results.md', 'r') as f:
-              content = f.read()
-
-          # Replace the row for this tag
-          pattern = rf'^\| {re.escape(target_tag)} \|.*$'
-          content = re.sub(pattern, new_row, content, flags=re.MULTILINE)
-
-          with open('results.md', 'w') as f:
-              f.write(content)
-          PYEOF
-          else
-            echo "Adding new row for $TARGET_TAG (first test)"
-
-            # First test of this tag
-            NEW_ROW="| $TARGET_TAG | $TAG_DATE | $TESTED_AT | $RESULT |"
-
-            # Insert new row in the Linus Mainline Release Tags section
-            python3 - "$NEW_ROW" "$TARGET_TAG" << 'PYEOF'
+          # Insert new row in the Linus Mainline Release Tags section
+          python3 - "$NEW_ROW" "$TARGET_TAG" << 'PYEOF'
           import sys
           import re
 
@@ -333,8 +305,9 @@ jobs:
                   existing_tag = match.group(1)
                   existing_version = parse_version(existing_tag)
 
-                  # Insert before this row if new tag is newer
-                  if new_version > existing_version:
+                  # Insert before this row if new tag is newer, or is the
+                  # same tag (a rerun goes above earlier attempts)
+                  if new_version >= existing_version:
                       insert_idx = i
                       break
                   else:
@@ -346,7 +319,6 @@ jobs:
           with open('results.md', 'w') as f:
               f.writelines(lines)
           PYEOF
-          fi
 
       - name: commit results to gh-pages
         run: |
